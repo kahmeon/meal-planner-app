@@ -9,10 +9,10 @@ It is a 3-tier PHP/MySQL application that allows users to manage recipes, plan m
 
 | Module                 | Assigned Member |
 |------------------------|------------------|
-| Recipe Management      | [Name 1]         |
-| Meal Planning          | Pow Kah Meon         |
-| Community Engagement   | [Name 3]         |
-| Cooking Competition    | [Name 4]         |
+| Recipe Management      | Pow Kah Meon         |
+| Meal Planning          | Lennon Tan           |
+| Community Engagement   | Lee Hui Xin          |
+| Cooking Competition    | Song Jia Seng        |
 
 ---
 
