@@ -1,14 +1,20 @@
-# meal-planner-app
+# 🍽️ Meal Planner Web Application
 
-to combine all module
-# Switch to main
-git checkout main
-git pull origin main
+This is a group project for **UCCD3243 Server-Side Web Applications Development**.  
+It is a 3-tier PHP/MySQL application that allows users to manage recipes, plan meals, join cooking competitions, and engage with the community.
 
-# Merge a branch
-git merge feature/recipe-module
-git merge feature/meal-planning
-... etc
+---
 
-# Then push the final version
-git push origin main
+## 👥 Team Members & Module Assignment
+
+| Module                 | Assigned Member |
+|------------------------|------------------|
+| Recipe Management      | [Name 1]         |
+| Meal Planning          | Pow Kah Meon         |
+| Community Engagement   | [Name 3]         |
+| Cooking Competition    | [Name 4]         |
+
+---
+
+## 🛠️ Project Folder Structure
+
