@@ -12,10 +12,59 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <style>
-    body {
-      background-color: #fff;
-      font-family: 'Poppins', sans-serif;
-    }
+  /* ===== Core Fixes ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content wrapper (add this class to your content div) */
+.content {
+  flex: 1;
+}
+
+/* ===== Footer Fix ===== */
+footer {
+  background-color: #343a40;
+  color: white;
+  width: 100%;
+  margin-top: auto; /* Critical for sticking to bottom */
+  padding: 2rem 0;
+}
+
+/* ===== Existing Footer Styles (keep these) ===== */
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+footer .row {
+  --bs-gutter-x: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+footer .col-md-3,
+footer .col-md-2,
+footer .col-md-4 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+footer hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-color: #6c757d;
+}
 
     .logo {
       font-family: 'Pacifico', cursive;
@@ -76,22 +125,29 @@
       font-size: 0.95rem;
     }
 
-    .trust-badges {
-    background-color: #f9f9f9;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+/* Trust badges spacing */
+.trust-badges {
+  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
 }
 
 .trust-badges img {
-    transition: all 0.3s ease;
-    opacity: 0.7;
-    filter: grayscale(30%);
+  transition: all 0.3s ease;
+  opacity: 0.7;
+  filter: grayscale(30%);
+  margin: 0 1rem; /* Horizontal spacing between badges */
 }
 
 .trust-badges img:hover {
-    opacity: 1;
-    filter: grayscale(0);
-    transform: scale(1.05);
+  opacity: 1;
+  filter: grayscale(0);
+  transform: scale(1.05);
+}
+
+/* Remove space between sections */
+.trust-badges + footer {
+  margin-top: 0 !important;
 }
   </style>
 </head>
@@ -356,35 +412,19 @@
     </div>
   </div>
   
- <!-- Trust Badges Section -->
-<section class="trust-badges py-4">
-  <div class="container">
-    <div class="row justify-content-center align-items-center g-4">
-      <div class="col-auto">
-        <img src="images/badges/food-magazine.png" 
-             alt="Featured in Food Magazine" 
-             class="img-fluid trust-badge"
-             style="height: 30px;">
-      </div>
-      <div class="col-auto">
-        <img src="images/badges/top-app-2023.png" 
-             alt="Top App 2023" 
-             class="img-fluid trust-badge"
-             style="height: 30px;">
-      </div>
-      <div class="col-auto">
-        <img src="images/badges/chef-approved.png" 
-             alt="Chef Approved" 
-             class="img-fluid trust-badge"
-             style="height: 30px;">
-      </div>
+ <!-- Trust Badges - No spacing version -->
+<div class="bg-light py-3" style="width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw;">
+    <div class="container text-center">
+        <div class="d-flex justify-content-center gap-4">
+            <img src="images/badges/food-magazine.png" alt="Featured in Food Magazine" style="height: 30px;">
+            <img src="images/badges/top-app-2023.png" alt="Top App 2023" style="height: 30px;">
+            <img src="images/badges/chef-approved.png" alt="Chef Approved" style="height: 30px;">
+        </div>
     </div>
-  </div>
-</section>
+</div>
 
-<!-- Footer - Outside all other sections -->
+<footer>
 <?php include 'includes/footer.php'; ?>
-
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
