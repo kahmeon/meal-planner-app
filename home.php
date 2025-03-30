@@ -21,49 +21,15 @@ html, body {
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* prevent unwanted horizontal scroll */
 }
+
 
 /* Main content wrapper (add this class to your content div) */
 .content {
   flex: 1;
-}
-
-/* ===== Footer Fix ===== */
-footer {
-  background-color: #343a40;
-  color: white;
-  width: 100%;
-  margin-top: auto; /* Critical for sticking to bottom */
-  padding: 2rem 0;
-}
-
-/* ===== Existing Footer Styles (keep these) ===== */
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
-
-footer .row {
-  --bs-gutter-x: 0;
-  margin-left: 0;
-  margin-right: 0;
-}
-
-footer .col-md-3,
-footer .col-md-2,
-footer .col-md-4 {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-footer hr {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border-color: #6c757d;
 }
 
     .logo {
@@ -149,9 +115,21 @@ footer hr {
 .trust-badges + footer {
   margin-top: 0 !important;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+footer {
+  margin-top: auto; /* Pushes footer to bottom if content is short */
+}
+
   </style>
 </head>
 <body>
+<div class="wrapper d-flex flex-column min-vh-100">
 
 <?php include 'navbar.php'; ?>
 
@@ -421,13 +399,11 @@ footer hr {
             <img src="images/badges/chef-approved.png" alt="Chef Approved" style="height: 30px;">
         </div>
     </div>
+   
+</div>
 </div>
 
-<footer>
 <?php include 'includes/footer.php'; ?>
-
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
