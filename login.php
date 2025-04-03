@@ -141,7 +141,7 @@ if (isset($_SESSION['signup_success'])) {
     </div>
 
     <div class="auth-body">
-      <form action="login.php" method="POST">
+      <form action="login_process.php" method="POST">
         <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
         <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
 

@@ -130,8 +130,9 @@ $basePath = '/meal-planner-app/';
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="#">Tips & Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Feedback</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>contactus.php">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>feedback.php">Feedback</a></li>
+
 
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
           <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>admin/dashboard.php">Admin Panel</a></li>
