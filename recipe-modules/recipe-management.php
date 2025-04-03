@@ -1,92 +1,94 @@
-<?php session_start(); ?>
+<?php
+session_start();
+include '../includes/db.php';
+include '../navbar.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../home.php");
+    exit();
+}
+
+$username = $_SESSION['user_name']; 
+$role = $_SESSION['user_role'];     
+
+
+// Get recipe stats
+$user_id = $_SESSION['user_id'];
+$statsQuery = ($role === 'admin') ?
+    "SELECT 
+        COUNT(*) AS total, 
+        SUM(status = 'pending') AS pending, 
+        SUM(status = 'approved') AS approved 
+     FROM recipes" :
+    "SELECT 
+        COUNT(*) AS total, 
+        SUM(status = 'pending') AS pending, 
+        SUM(status = 'approved') AS approved 
+     FROM recipes WHERE user_id = $user_id";
+
+$result = mysqli_query($conn, $statsQuery);
+$stats = mysqli_fetch_assoc($result);
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Recipe Management | NomNomPlan</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Bootstrap JS (dropdowns need this) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .logo {
-      font-family: 'Pacifico', cursive;
-      font-size: 2rem;
-      color: #e00000;
-    }
-    .page-header {
-      background-color: #fff;
-      padding: 2rem 1rem;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-  </style>
+    <title>Recipe Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
 </head>
 <body>
+<div class="container mt-4">
 
-<?php include '../navbar.php'; ?>
+    <div class="text-center mb-4">
+        <h1>🍽️ Recipe Management Dashboard</h1>
+        <p class="lead">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong> (<?php echo $role; ?>)</p>
+    </div>
 
-<!-- Page Header -->
-<div class="page-header mb-4">
-  <h1 class="logo">NomNomPlan</h1>
-  <h2 class="mt-2">Recipe Management</h2>
-  <p class="text-muted">View, organize, and manage your recipes</p>
-</div>
+    <!-- Recipe Stats -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Total Recipes</h5>
+                    <p class="fs-4"><?php echo $stats['total']; ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Pending Recipes</h5>
+                    <p class="fs-4 text-warning"><?php echo $stats['pending']; ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Approved Recipes</h5>
+                    <p class="fs-4 text-success"><?php echo $stats['approved']; ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="container mb-5">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Your Recipes</h4>
-    <a href="#" class="btn btn-danger">+ Add New Recipe</a>
-  </div>
+    <!-- Action Links -->
+    <div class="text-center">
+        <a href="recipe-add.php" class="btn btn-primary m-2">➕ Add New Recipe</a>
+        <a href="recipe-list.php" class="btn btn-secondary m-2">📃 View All Recipes</a>
+        <a href="recipe-search.php" class="btn btn-info m-2">🔍 Search Recipes</a>
+    </div>
 
-  <!-- Sample Static Table -->
-  <table class="table table-bordered bg-white">
-    <thead class="table-light">
-      <tr>
-        <th>#</th>
-        <th>Recipe Name</th>
-        <th>Category</th>
-        <th>Created Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>Spaghetti Bolognese</td>
-        <td>Pasta</td>
-        <td>2025-03-28</td>
-        <td>
-          <a href="#" class="btn btn-sm btn-outline-primary">View</a>
-          <a href="#" class="btn btn-sm btn-outline-success">Edit</a>
-          <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
-        </td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>Chicken Curry</td>
-        <td>Main Dish</td>
-        <td>2025-03-26</td>
-        <td>
-          <a href="#" class="btn btn-sm btn-outline-primary">View</a>
-          <a href="#" class="btn btn-sm btn-outline-success">Edit</a>
-          <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <?php if ($role === 'admin'): ?>
+        <div class="alert alert-info mt-4 text-center">
+            👑 As an admin, you can manage all users' recipes.
+        </div>
+    <?php endif; ?>
+
 </div>
 
 <?php include '../includes/footer.php'; ?>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
