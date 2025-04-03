@@ -106,6 +106,7 @@ $basePath = '/meal-planner-app/';
 </head>
 <body>
 
+
 <nav class="navbar navbar-expand-lg navbar-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="<?= $basePath ?>home.php">NomNomPlan</a>
