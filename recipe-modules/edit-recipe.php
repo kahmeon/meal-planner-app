@@ -168,18 +168,29 @@ $existingImages = $imageResult->fetch_all(MYSQLI_ASSOC);
 
     <div class="mb-3">
       <label class="form-label">Existing Images</label><br>
-      <?php foreach ($existingImages as $img): ?>
-        <div class="d-inline-block me-2 text-center">
-          <img src="<?= $img['image_url'] ?>" class="image-thumb mb-1"><br>
-          <input type="checkbox" name="delete_images[]" value="<?= $img['id'] ?>"> Delete
-        </div>
-      <?php endforeach; ?>
+      <?php
+$basePath = '/MEAL-PLANNER-APP/';
+foreach ($existingImages as $img): 
+?>
+  <div class="d-inline-block me-2 text-center">
+    <img src="<?= $basePath . ltrim($img['image_url'], '/') ?>" class="image-thumb mb-1"><br>
+    <input type="checkbox" name="delete_images[]" value="<?= $img['id'] ?>"> Delete
+  </div>
+<?php endforeach; ?>
+
     </div>
 
     <div class="mb-3">
       <label class="form-label">Upload New Images</label>
       <input type="file" name="images[]" class="form-control" multiple accept="image/*">
     </div>
+
+    <div class="form-check mb-4">
+  <input class="form-check-input" type="checkbox" name="is_public" id="is_public" value="1" <?= $recipe['is_public'] ? 'checked' : '' ?>>
+  <label class="form-check-label" for="is_public">
+    Make recipe public
+  </label>
+</div>
 
     <div class="text-end">
       <button type="submit" class="btn btn-success">Update Recipe</button>

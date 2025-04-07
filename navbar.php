@@ -124,7 +124,7 @@ $basePath = '/meal-planner-app/';
             Our Services
           </a>
           <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
-            <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/recipe-management.php">Recipe Management</a></li>
+            <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/list-recipes.php">Recipe Management</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>meal-planning-module/meal-plan.php">Meal Planning</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>community-module/community.php">Community Engagement</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>competition-module/competition.php">Cooking Competition</a></li>
