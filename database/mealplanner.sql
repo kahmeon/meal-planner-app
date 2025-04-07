@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2025 at 01:32 PM
+-- Generation Time: Apr 03, 2025 at 06:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -208,12 +208,9 @@ CREATE TABLE `recipes` (
 -- Dumping data for table `recipes`
 --
 
-INSERT INTO `recipes` (`id`, `title`, `description`, `ingredients`, `steps`, `cuisine`, `prep_time`, `cook_time`, `total_time`, `difficulty`, `nutrition`, `status`, `is_public`, `view_count`, `created_by`, `created_at`, `updated_at`, `admin_note`, `image_url`, `instructions`) VALUES
-(2, 'Nasi Kerabu', 'Nasi Kerabu is a traditional Malaysian dish featuring blue-colored rice, usually dyed with butterfly pea flowers. It is served with a variety of fresh herbs, salted egg, fried fish or chicken, and a flavorful coconut-based sambal sauce. This dish is popular in Kelantan and Terengganu, offering a unique mix of flavors and textures.', '[\"For the Blue Rice:\",\"2 cups white rice (Jasmine or Basmati)\",\"10 dried butterfly pea flowers (bunga telang)\",\"2 cups water\",\"1 pandan leaf (knotted)\",\"1\\/2 tsp salt\",\"For the Garnishes:\",\"1 cup bean sprouts (blanched)\",\"1\\/2 cup shredded cabbage\",\"1\\/2 cup finely sliced torch ginger flower (bunga kantan)\",\"1\\/2 cup fresh herbs (mint, basil, ulam raja, or daun kesum)\",\"1\\/4 cup kerisik (toasted grated coconut)\",\"1 salted egg (cut into halves)\",\"1 fried fish or grilled chicken\",\"For the Sambal Kelapa (Coconut Sambal):\",\"1 cup grated coconut (toasted)\",\"3 shallots (finely chopped)\",\"2 cloves garlic (minced)\",\"1 tbsp dried shrimp (pounded)\",\"1 tsp turmeric powder\",\"1\\/2 tsp salt\",\"1 tbsp sugar\"]', '[\"Step 1: Prepare the Blue Rice\",\"1.\\tBoil butterfly pea flowers in 2 cups of water for 5 minutes. Strain and keep the blue water.\",\"2.\\tWash the rice and place it in a rice cooker. Add the blue water, pandan leaf, and salt.\",\"3.\\tCook the rice as usual until fluffy.\",\"Step 2: Make the Coconut Sambal\",\"1.\\tHeat a pan and dry-toast the grated coconut until golden brown.\",\"2.\\tAdd shallots, garlic, dried shrimp, turmeric powder, salt, and sugar. Stir well and set aside.\",\"Step 3: Prepare the Garnishes\",\"1.\\tBlanch the bean sprouts in boiling water for 30 seconds. Drain.\",\"2.\\tSlice all the fresh herbs and vegetables thinly.\",\"Step 4: Assemble the Dish\",\"1.\\tPlace a serving of blue rice on a plate.\",\"2.\\tArrange the fresh herbs, bean sprouts, cabbage, and bunga kantan around the rice.\",\"3.\\tAdd a spoonful of sambal kelapa, a piece of fried fish or grilled chicken, and a salted egg.\",\"4.\\tOptionally, serve with budu (fermented anchovy sauce) for extra flavor.\"]', 'Malaysian (Kelantanese)', 60, 50, 110, '', 'Calories: ~500 kcal\r\nCarbohydrates: 80g\r\nProtein: 20g\r\nFat: 10g\r\nFiber: 5g', 'approved', 1, 0, 1, '2025-04-02 18:49:54', '2025-04-03 10:09:54', NULL, NULL, NULL),
-(3, 'Penang Laksa (Asam Laksa)', 'Penang Laksa, also known as Asam Laksa, is a famous Malaysian noodle dish with a tangy, spicy, and flavorful fish broth. Unlike curry laksa, Penang Laksa uses a tamarind-based broth, giving it a sour taste, and is topped with fresh herbs, shredded fish, and pineapple. It is a signature dish from Penang, loved for its refreshing yet bold flavors.', '[\"For the Broth:\",\"500g mackerel (ikan kembung), cleaned\",\"2 liters water\",\"4 tbsp tamarind paste (asam jawa)\",\"2 stalks lemongrass (bruised)\",\"3 daun kesum (Vietnamese coriander) or mint leaves\",\"1 tbsp sugar\",\"1 tsp salt\",\"For the Spice Paste (Blend Together):\",\"5 dried chilies (soaked and deseeded)\",\"3 fresh red chilies\",\"5 shallots\",\"2 cloves garlic\",\"2 tsp shrimp paste (belacan)\",\"1 tbsp turmeric powder\",\"1 tbsp cooking oil\",\"For the Laksa Noodles & Toppings:\",\"400g thick rice noodles (laksa noodles)\",\"½ cucumber (julienned)\",\"½ pineapple (thinly sliced)\",\"1 red onion (thinly sliced)\",\"1 small bunch of mint leaves\",\"1 red chili (thinly sliced)\",\"1\\/2 cup torch ginger flower (bunga kantan), finely sliced\",\"½ cup thick shrimp paste sauce (petis udang)\"]', '[\"Step 1: Prepare the Fish Broth\",\"1.\\tBring 2 liters of water to a boil and add the cleaned mackerel. Cook for 10 minutes until the fish is fully cooked.\",\"2.\\tRemove the fish, let it cool, then debone and flake the flesh. Set aside.\",\"3.\\tStrain the fish broth to remove any impurities.\",\"Step 2: Cook the Laksa Broth\",\"1.\\tHeat a pot with 1 tbsp oil and sauté the blended spice paste until fragrant.\",\"2.\\tPour in the strained fish broth, then add lemongrass, daun kesum, tamarind paste, sugar, and salt.\",\"3.\\tSimmer for 20–30 minutes. Add the flaked fish back into the broth and continue simmering.\",\"Step 3: Prepare the Laksa Noodles\",\"1.\\tCook the laksa noodles according to the package instructions. Drain and set aside.\",\"Step 4: Assemble the Dish\",\"1.\\tPlace cooked laksa noodles in a bowl.\",\"2.\\tLadle the hot broth over the noodles.\",\"3.\\tGarnish with cucumber, pineapple, red onion, mint leaves, bunga kantan, and red chili slices.\",\"4.\\tDrizzle with thick shrimp paste sauce (petis udang) before serving.\"]', 'Malaysian (Penang)', 50, 50, 100, '', 'Calories: ~450 kcal\r\nCarbohydrates: 80g\r\nProtein: 25g\r\nFat: 5g\r\nFiber: 6g', 'approved', 1, 0, 1, '2025-04-02 19:51:20', '2025-04-03 09:58:03', NULL, NULL, NULL),
-(4, 'Test Winning Recipe', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', 1, 0, 6, '2025-04-16 05:51:02', '2025-04-16 05:51:02', NULL, NULL, NULL),
-(5, 'Test Winning Recipe', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', 1, 0, 6, '2025-04-16 05:52:51', '2025-04-16 05:52:51', NULL, NULL, NULL),
-(12, 'Winning Recipe Title', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', 1, 0, NULL, '2025-04-16 06:17:10', '2025-04-16 06:17:10', NULL, 'path_to_recipe_image', NULL);
+INSERT INTO `recipes` (`id`, `title`, `description`, `ingredients`, `steps`, `cuisine`, `prep_time`, `cook_time`, `total_time`, `difficulty`, `nutrition`, `status`, `is_public`, `view_count`, `created_by`, `created_at`, `updated_at`, `admin_note`) VALUES
+(2, 'Nasi Kerabu', 'Nasi Kerabu is a traditional Malaysian dish featuring blue-colored rice, usually dyed with butterfly pea flowers. It is served with a variety of fresh herbs, salted egg, fried fish or chicken, and a flavorful coconut-based sambal sauce. This dish is popular in Kelantan and Terengganu, offering a unique mix of flavors and textures.', '[\"For the Blue Rice:\",\"2 cups white rice (Jasmine or Basmati)\",\"10 dried butterfly pea flowers (bunga telang)\",\"2 cups water\",\"1 pandan leaf (knotted)\",\"1\\/2 tsp salt\",\"For the Garnishes:\",\"1 cup bean sprouts (blanched)\",\"1\\/2 cup shredded cabbage\",\"1\\/2 cup finely sliced torch ginger flower (bunga kantan)\",\"1\\/2 cup fresh herbs (mint, basil, ulam raja, or daun kesum)\",\"1\\/4 cup kerisik (toasted grated coconut)\",\"1 salted egg (cut into halves)\",\"1 fried fish or grilled chicken\",\"For the Sambal Kelapa (Coconut Sambal):\",\"1 cup grated coconut (toasted)\",\"3 shallots (finely chopped)\",\"2 cloves garlic (minced)\",\"1 tbsp dried shrimp (pounded)\",\"1 tsp turmeric powder\",\"1\\/2 tsp salt\",\"1 tbsp sugar\"]', '[\"Step 1: Prepare the Blue Rice\",\"1.\\tBoil butterfly pea flowers in 2 cups of water for 5 minutes. Strain and keep the blue water.\",\"2.\\tWash the rice and place it in a rice cooker. Add the blue water, pandan leaf, and salt.\",\"3.\\tCook the rice as usual until fluffy.\",\"Step 2: Make the Coconut Sambal\",\"1.\\tHeat a pan and dry-toast the grated coconut until golden brown.\",\"2.\\tAdd shallots, garlic, dried shrimp, turmeric powder, salt, and sugar. Stir well and set aside.\",\"Step 3: Prepare the Garnishes\",\"1.\\tBlanch the bean sprouts in boiling water for 30 seconds. Drain.\",\"2.\\tSlice all the fresh herbs and vegetables thinly.\",\"Step 4: Assemble the Dish\",\"1.\\tPlace a serving of blue rice on a plate.\",\"2.\\tArrange the fresh herbs, bean sprouts, cabbage, and bunga kantan around the rice.\",\"3.\\tAdd a spoonful of sambal kelapa, a piece of fried fish or grilled chicken, and a salted egg.\",\"4.\\tOptionally, serve with budu (fermented anchovy sauce) for extra flavor.\"]', 'Malaysian (Kelantanese)', 60, 50, 110, '', 'Calories: ~500 kcal\r\nCarbohydrates: 80g\r\nProtein: 20g\r\nFat: 10g\r\nFiber: 5g', 'approved', 1, 0, 1, '2025-04-02 18:49:54', '2025-04-03 10:09:54', NULL),
+(3, 'Penang Laksa (Asam Laksa)', 'Penang Laksa, also known as Asam Laksa, is a famous Malaysian noodle dish with a tangy, spicy, and flavorful fish broth. Unlike curry laksa, Penang Laksa uses a tamarind-based broth, giving it a sour taste, and is topped with fresh herbs, shredded fish, and pineapple. It is a signature dish from Penang, loved for its refreshing yet bold flavors.', '[\"For the Broth:\",\"500g mackerel (ikan kembung), cleaned\",\"2 liters water\",\"4 tbsp tamarind paste (asam jawa)\",\"2 stalks lemongrass (bruised)\",\"3 daun kesum (Vietnamese coriander) or mint leaves\",\"1 tbsp sugar\",\"1 tsp salt\",\"For the Spice Paste (Blend Together):\",\"5 dried chilies (soaked and deseeded)\",\"3 fresh red chilies\",\"5 shallots\",\"2 cloves garlic\",\"2 tsp shrimp paste (belacan)\",\"1 tbsp turmeric powder\",\"1 tbsp cooking oil\",\"For the Laksa Noodles & Toppings:\",\"400g thick rice noodles (laksa noodles)\",\"½ cucumber (julienned)\",\"½ pineapple (thinly sliced)\",\"1 red onion (thinly sliced)\",\"1 small bunch of mint leaves\",\"1 red chili (thinly sliced)\",\"1\\/2 cup torch ginger flower (bunga kantan), finely sliced\",\"½ cup thick shrimp paste sauce (petis udang)\"]', '[\"Step 1: Prepare the Fish Broth\",\"1.\\tBring 2 liters of water to a boil and add the cleaned mackerel. Cook for 10 minutes until the fish is fully cooked.\",\"2.\\tRemove the fish, let it cool, then debone and flake the flesh. Set aside.\",\"3.\\tStrain the fish broth to remove any impurities.\",\"Step 2: Cook the Laksa Broth\",\"1.\\tHeat a pot with 1 tbsp oil and sauté the blended spice paste until fragrant.\",\"2.\\tPour in the strained fish broth, then add lemongrass, daun kesum, tamarind paste, sugar, and salt.\",\"3.\\tSimmer for 20–30 minutes. Add the flaked fish back into the broth and continue simmering.\",\"Step 3: Prepare the Laksa Noodles\",\"1.\\tCook the laksa noodles according to the package instructions. Drain and set aside.\",\"Step 4: Assemble the Dish\",\"1.\\tPlace cooked laksa noodles in a bowl.\",\"2.\\tLadle the hot broth over the noodles.\",\"3.\\tGarnish with cucumber, pineapple, red onion, mint leaves, bunga kantan, and red chili slices.\",\"4.\\tDrizzle with thick shrimp paste sauce (petis udang) before serving.\"]', 'Malaysian (Penang)', 50, 50, 100, '', 'Calories: ~450 kcal\r\nCarbohydrates: 80g\r\nProtein: 25g\r\nFat: 5g\r\nFiber: 6g', 'approved', 1, 0, 1, '2025-04-02 19:51:20', '2025-04-03 09:58:03', NULL);
 
 -- --------------------------------------------------------
 
@@ -232,11 +229,30 @@ CREATE TABLE `recipe_images` (
 --
 
 INSERT INTO `recipe_images` (`id`, `recipe_id`, `image_url`) VALUES
-(3, 2, '../uploads/1743619794_nasi-kerabu1.jpg'),
-(4, 2, '../uploads/1743619794_nasi-kerabu.jpg'),
-(6, 3, '../uploads/1743623480_penang-laksa.jpg'),
-(7, 3, '../uploads/1743624745_penang-laksa2.jpg'),
-(8, 3, '../uploads/1743624745_penang-laksa1.jpg');
+(20, 16, 'uploads/recipes/1743996501_nasi-lemak.webp'),
+(21, 14, 'uploads/recipes/1743996731_nasi-lemak.webp'),
+(22, 4, 'uploads/recipes/1743996773_nasi-lemak.webp'),
+(23, 17, '/uploads/recipes/1744002369_nasi-lemak.webp'),
+(24, 18, '/uploads/recipes/1744002737_nasi-lemak.webp'),
+(25, 2, '/uploads/recipes/1744003544_nasi-kerabu1.jpg'),
+(26, 2, '/uploads/recipes/1744003544_nasi-kerabu.jpg'),
+(27, 3, '/uploads/recipes/1744003565_penang-laksa2.jpg'),
+(28, 3, '/uploads/recipes/1744003565_penang-laksa1.jpg'),
+(29, 3, '/uploads/recipes/1744003565_penang-laksa.jpg'),
+(30, 19, '/uploads/recipes/1744003855_char-koay-teow.jpg'),
+(31, 19, '/uploads/recipes/1744003874_char-kway-teow-15.jpg'),
+(32, 19, '/uploads/recipes/1744003874_char-koay-teow1.jpg'),
+(33, 19, '/uploads/recipes/1744003874_char-koay-teow.jpg'),
+(34, 5, '/uploads/recipes/1744004710_char-kway-teow-15.jpg'),
+(35, 5, '/uploads/recipes/1744004710_char-koay-teow1.jpg'),
+(36, 5, '/uploads/recipes/1744004710_char-koay-teow.jpg'),
+(37, 6, '/uploads/recipes/1744005793_burger-special2.jpg'),
+(38, 6, '/uploads/recipes/1744005793_burger-special1.jpg'),
+(39, 6, '/uploads/recipes/1744005793_burger-special.jpg'),
+(40, 21, '/uploads/recipes/1744006517_nasi-lemak.webp'),
+(41, 22, '/uploads/recipes/1744016854_burger-special2.jpg'),
+(42, 22, '/uploads/recipes/1744016854_burger-special1.jpg'),
+(43, 22, '/uploads/recipes/1744016854_burger-special.jpg');
 
 -- --------------------------------------------------------
 
@@ -257,7 +273,18 @@ INSERT INTO `recipe_tags` (`recipe_id`, `tag_id`) VALUES
 (2, 1),
 (2, 3),
 (3, 1),
-(3, 5);
+(3, 5),
+(4, 1),
+(4, 3),
+(6, 3),
+(15, 3),
+(16, 3),
+(17, 3),
+(18, 5),
+(19, 1),
+(20, 1),
+(21, 3),
+(22, 3);
 
 -- --------------------------------------------------------
 
@@ -350,13 +377,9 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `avatar_url`, `password`, `role`, `created_at`, `status`) VALUES
-(1, 'Pow Kah Meon', 'khmeon058@1utar.my', NULL, '$2y$10$8lWMm8bnrcEqk1PGez1eM.ot6BQT9i7PmizKtiYLs7cxSYdAzMI5S', 'user', '2025-03-28 05:30:54', 'active'),
-(2, 'Carmen', 'khmeon058@gmail.com', NULL, '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52', 'active'),
-(3, 'SONG JIA SENG', 'jiaseng2106@gmail.com', NULL, '$2y$10$Is8U2Qr4coa7XCREJU.P7eAEvXviHZjNdzK.Z6pNHDuEAjWLFJEnS', 'user', '2025-04-04 00:16:20', 'active'),
-(4, 'admin', 'admin@gmail.com', NULL, '$2y$10$M9m4jPxGsu8vCQT7bfhLC.O3ZwkgsNfm7an3NSNAzySDsOdwZuNYS', 'admin', '2025-04-05 05:38:58', 'active'),
-(5, 'user', 'user@example.com', NULL, '$2y$10$KJvBxcYaenbWG4SiKr8Y1.ahJ89/j2WpCw2am5xaTjab.rleitAVC', 'user', '2025-04-11 06:44:04', 'pending'),
-(6, 'Test Winner', 'winner@example.com', 'https://example.com/avatar.jpg', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '2025-04-16 05:42:41', 'active');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
+(1, 'Pow Kah Meon', 'khmeon058@1utar.my', '$2y$10$8lWMm8bnrcEqk1PGez1eM.ot6BQT9i7PmizKtiYLs7cxSYdAzMI5S', 'user', '2025-03-28 05:30:54'),
+(2, 'Carmen', 'khmeon058@gmail.com', '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52');
 
 --
 -- Indexes for dumped tables
@@ -522,13 +545,13 @@ ALTER TABLE `ratings`
 -- AUTO_INCREMENT for table `recipes`
 --
 ALTER TABLE `recipes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `recipe_images`
 --
 ALTER TABLE `recipe_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `recipe_views`
@@ -558,7 +581,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
