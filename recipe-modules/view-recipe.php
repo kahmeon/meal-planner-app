@@ -4,6 +4,7 @@ require_once '../includes/db.php';
 
 $loggedIn = isset($_SESSION['user_id']);
 $role = $_SESSION['user_role'] ?? 'user';
+$user_id = $_SESSION['user_id'] ?? null;
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: recipe-management.php");
@@ -11,6 +12,33 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $recipe_id = (int) $_GET['id'];
+
+// Check if user has saved this recipe
+$isSaved = false;
+if ($loggedIn) {
+  $saveCheck = $conn->prepare("SELECT 1 FROM saved_recipes WHERE user_id = ? AND recipe_id = ? LIMIT 1");
+    $saveCheck->bind_param("ii", $user_id, $recipe_id);
+    $saveCheck->execute();
+    $isSaved = $saveCheck->get_result()->num_rows > 0;
+    $saveCheck->close();
+}
+
+// Handle save/unsave action
+if ($loggedIn && isset($_POST['save_action'])) {
+    if ($_POST['save_action'] === 'save') {
+        $saveStmt = $conn->prepare("INSERT INTO saved_recipes (user_id, recipe_id) VALUES (?, ?)");
+        $saveStmt->bind_param("ii", $user_id, $recipe_id);
+        $saveStmt->execute();
+        $saveStmt->close();
+        $isSaved = true;
+    } elseif ($_POST['save_action'] === 'unsave') {
+        $unsaveStmt = $conn->prepare("DELETE FROM saved_recipes WHERE user_id = ? AND recipe_id = ?");
+        $unsaveStmt->bind_param("ii", $user_id, $recipe_id);
+        $unsaveStmt->execute();
+        $unsaveStmt->close();
+        $isSaved = false;
+    }
+}
 
 $query = $conn->prepare("SELECT recipes.*, users.name AS username FROM recipes LEFT JOIN users ON recipes.created_by = users.id WHERE recipes.id = ?");
 $query->bind_param("i", $recipe_id);
@@ -427,6 +455,25 @@ function formatNutritionFacts($nutrition) {
       color: white;
     }
     
+    .btn-save-recipe {
+      border-color: var(--accent-color);
+      color: var(--dark-color);
+    }
+    
+    .btn-save-recipe:hover, .btn-save-recipe.saved {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: var(--dark-color);
+    }
+    
+    .btn-save-recipe i {
+      transition: all 0.3s ease;
+    }
+    
+    .btn-save-recipe.saved i {
+      transform: scale(1.2);
+    }
+    
     @media print {
       .print-hidden {
         display: none !important;
@@ -496,7 +543,6 @@ function formatNutritionFacts($nutrition) {
             <?php foreach ($images as $img): ?>
               <div class="swiper-slide">
               <img src="/meal-planner-app/<?= ltrim($img, '/') ?>" alt="<?= htmlspecialchars($recipe['title']) ?>">
-
               </div>
             <?php endforeach; ?>
           </div>
@@ -564,6 +610,16 @@ function formatNutritionFacts($nutrition) {
             </div>
           </div>
         </div>
+        
+        <?php if ($loggedIn): ?>
+        <form method="post" class="mt-4">
+          <button type="submit" name="save_action" value="<?= $isSaved ? 'unsave' : 'save' ?>" 
+                  class="btn btn-save-recipe btn-hover-effect w-100 <?= $isSaved ? 'saved' : '' ?>">
+            <i class="bi bi-bookmark<?= $isSaved ? '-fill' : '' ?>"></i> 
+            <?= $isSaved ? 'Saved' : 'Save Recipe' ?>
+          </button>
+        </form>
+        <?php endif; ?>
       </div>
     </div>
   </div>
@@ -653,6 +709,19 @@ function formatNutritionFacts($nutrition) {
     item.style.transition = 'all 0.4s ease';
     observer.observe(item);
   });
+  
+  // Add animation to save button
+  const saveBtn = document.querySelector('.btn-save-recipe');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function() {
+      this.classList.toggle('saved');
+      const icon = this.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('bi-bookmark');
+        icon.classList.toggle('bi-bookmark-fill');
+      }
+    });
+  }
 </script>
 </body>
 </html>

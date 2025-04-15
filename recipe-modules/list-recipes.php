@@ -4,25 +4,30 @@ require_once '../includes/db.php';
 
 // Handle search/filter
 $search = $_GET['search'] ?? '';
-$cuisine = $_GET['cuisine'] ?? '';
-$difficulty = $_GET['difficulty'] ?? '';
+$cuisine = isset($_GET['cuisine']) ? (array)$_GET['cuisine'] : [];
+$difficulty = isset($_GET['difficulty']) ? (array)$_GET['difficulty'] : [];
 
-$query = "SELECT * FROM recipes WHERE is_public = 1 AND status = 'approved'";
-$params = [];
+$query = "SELECT r.*, 
+          (SELECT COUNT(*) FROM saved_recipes sr WHERE sr.recipe_id = r.id AND sr.user_id = ?) as is_saved
+          FROM recipes r 
+          WHERE r.is_public = 1 AND r.status = 'approved'";
+$params = [$_SESSION['user_id'] ?? 0];
 
 if (!empty($search)) {
-    $query .= " AND title LIKE ?";
+    $query .= " AND r.title LIKE ?";
     $params[] = "%$search%";
 }
 
 if (!empty($cuisine)) {
-    $query .= " AND cuisine = ?";
-    $params[] = $cuisine;
+    $placeholders = implode(',', array_fill(0, count($cuisine), '?'));
+    $query .= " AND r.cuisine IN ($placeholders)";
+    $params = array_merge($params, $cuisine);
 }
 
 if (!empty($difficulty)) {
-    $query .= " AND difficulty = ?";
-    $params[] = $difficulty;
+    $placeholders = implode(',', array_fill(0, count($difficulty), '?'));
+    $query .= " AND r.difficulty IN ($placeholders)";
+    $params = array_merge($params, $difficulty);
 }
 
 $stmt = $conn->prepare($query);
@@ -47,7 +52,7 @@ $recipes = $stmt->get_result();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary-color:rgb(235, 227, 117);
+      --primary-color: rgb(235, 227, 117);
       --secondary-color: #ea0a02;
       --dark-color: #fef9f9;
       --light-color: #f30a0a;
@@ -171,6 +176,7 @@ $recipes = $stmt->get_result();
       height: 100%;
       box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       background: var(--card-bg);
+      position: relative;
     }
 
     .recipe-card:hover {
@@ -265,6 +271,74 @@ $recipes = $stmt->get_result();
       min-width: 200px;
     }
 
+    .save-recipe-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 2;
+    }
+
+    .save-recipe-btn:hover {
+      background: white;
+      transform: scale(1.1);
+    }
+
+    .save-recipe-btn.saved {
+      color: var(--accent-color);
+    }
+
+    .filter-section {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .filter-section h5 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-dark);
+    }
+
+    .form-check-label {
+      color: var(--text-light);
+      cursor: pointer;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    .filter-header {
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .filter-header::after {
+      content: '\f078';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      transition: transform 0.3s;
+    }
+
+    .filter-header.collapsed::after {
+      transform: rotate(-90deg);
+    }
+
     @media (max-width: 768px) {
       .hero-section {
         padding: 2rem 0;
@@ -281,6 +355,10 @@ $recipes = $stmt->get_result();
       
       .action-buttons .btn {
         flex: 100%;
+      }
+
+      .filter-section {
+        padding: 0.75rem;
       }
     }
   </style>
@@ -305,89 +383,136 @@ $recipes = $stmt->get_result();
     <a href="recipe-management.php" class="btn btn-outline-primary">
       <i class="fas fa-clipboard-list me-2"></i> Manage My Recipes
     </a>
+    <a href="saved-recipes.php" class="btn btn-outline-primary">
+      <i class="fas fa-bookmark me-2"></i> Saved Recipes
+    </a>
   </div>
 
-  <!-- Search and Filter Form -->
-  <form method="GET" class="filter-bar">
-    <div class="row g-3 align-items-end">
-      <div class="col-md-4 search-container">
-        <label for="search" class="form-label">Search Recipes</label>
-        <input type="text" name="search" class="form-control ps-4" placeholder="What are you craving today?" value="<?= htmlspecialchars($search) ?>">
-        <i class="fas fa-search search-icon"></i>
-      </div>
-      <div class="col-md-3">
-        <label for="cuisine" class="form-label">Cuisine</label>
-        <select name="cuisine" class="form-select">
-          <option value="">All Cuisines</option>
-          <option value="Malaysian" <?= $cuisine == 'Malaysian' ? 'selected' : '' ?>>Malaysian</option>
-          <option value="Chinese" <?= $cuisine == 'Chinese' ? 'selected' : '' ?>>Chinese</option>
-          <option value="Malay" <?= $cuisine == 'Malay' ? 'selected' : '' ?>>Malay</option>
-          <option value="Indian" <?= $cuisine == 'Indian' ? 'selected' : '' ?>>Indian</option>
-          <option value="Western" <?= $cuisine == 'Western' ? 'selected' : '' ?>>Western</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="difficulty" class="form-label">Difficulty</label>
-        <select name="difficulty" class="form-select">
-          <option value="">All Levels</option>
-          <option value="easy" <?= $difficulty == 'easy' ? 'selected' : '' ?>>Easy</option>
-          <option value="medium" <?= $difficulty == 'medium' ? 'selected' : '' ?>>Medium</option>
-          <option value="hard" <?= $difficulty == 'hard' ? 'selected' : '' ?>>Hard</option>
-        </select>
-      </div>
-      <div class="col-md-2 d-grid">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-filter me-2"></i> Apply
-        </button>
-      </div>
-    </div>
-  </form>
-
-  <!-- Recipe Cards Grid -->
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    <?php if ($recipes->num_rows > 0): ?>
-      <?php while ($recipe = $recipes->fetch_assoc()): ?>
-        <div class="col">
-          <div class="recipe-card card h-100">
-            <?php
-              $imgStmt = $conn->prepare("SELECT image_url FROM recipe_images WHERE recipe_id = ? LIMIT 1");
-              $imgStmt->bind_param("i", $recipe['id']);
-              $imgStmt->execute();
-              $imgResult = $imgStmt->get_result()->fetch_assoc();
-              $imageUrl = $imgResult && !empty($imgResult['image_url']) 
-  ? '/MEAL-PLANNER-APP/' . ltrim($imgResult['image_url'], '/') 
-  : '/MEAL-PLANNER-APP/assets/no-image.jpg';
-
-
-            ?>
-            <img src="<?= $imageUrl ?>" class="card-img-top" alt="<?= htmlspecialchars($recipe['title']) ?>">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="badge badge-cuisine rounded-pill"><?= htmlspecialchars($recipe['cuisine']) ?></span>
-                <span class="badge badge-difficulty rounded-pill"><?= ucfirst($recipe['difficulty']) ?></span>
-              </div>
-              <h5 class="card-title"><?= htmlspecialchars($recipe['title']) ?></h5>
-              <p class="card-text"><?= htmlspecialchars(substr($recipe['description'], 0, 120)) ?>...</p>
-              <div class="d-flex justify-content-between align-items-center mt-auto">
-                <small class="text-muted"><i class="far fa-clock me-1"></i> <?= $recipe['prep_time'] + $recipe['cook_time'] ?> mins</small>
-                <a href="view-recipe.php?id=<?= $recipe['id'] ?>" class="view-btn">
-                  View <i class="fas fa-arrow-right ms-1"></i>
-                </a>
-              </div>
+  <div class="row">
+    <!-- Filter Column -->
+    <div class="col-lg-3 mb-4">
+      <form method="GET" class="filter-bar">
+        <div class="search-container mb-3">
+          <label for="search" class="form-label">Search Recipes</label>
+          <input type="text" name="search" class="form-control ps-4" placeholder="What are you craving today?" value="<?= htmlspecialchars($search) ?>">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <!-- Cuisine Filter -->
+        <div class="filter-section">
+          <div class="filter-header" data-bs-toggle="collapse" data-bs-target="#cuisineFilter" aria-expanded="true">
+            <h5>Cuisine</h5>
+          </div>
+          <div class="collapse show" id="cuisineFilter">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cuisine[]" value="Malaysian" id="cuisineMalaysian" <?= in_array('Malaysian', $cuisine) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="cuisineMalaysian">Malaysian</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cuisine[]" value="Chinese" id="cuisineChinese" <?= in_array('Chinese', $cuisine) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="cuisineChinese">Chinese</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cuisine[]" value="Malay" id="cuisineMalay" <?= in_array('Malay', $cuisine) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="cuisineMalay">Malay</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cuisine[]" value="Indian" id="cuisineIndian" <?= in_array('Indian', $cuisine) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="cuisineIndian">Indian</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cuisine[]" value="Western" id="cuisineWestern" <?= in_array('Western', $cuisine) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="cuisineWestern">Western</label>
             </div>
           </div>
         </div>
-      <?php endwhile; ?>
-    <?php else: ?>
-      <div class="col-12">
-        <div class="no-results">
-          <i class="far fa-frown-open"></i>
-          <h3 class="mb-3">No recipes found</h3>
-          <p class="text-muted">Try adjusting your search filters or come back later for new recipes!</p>
-          <a href="?" class="btn btn-primary mt-3">Clear Filters</a>
+        
+        <!-- Difficulty Filter -->
+        <div class="filter-section">
+          <div class="filter-header" data-bs-toggle="collapse" data-bs-target="#difficultyFilter" aria-expanded="true">
+            <h5>Difficulty</h5>
+          </div>
+          <div class="collapse show" id="difficultyFilter">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="difficulty[]" value="easy" id="difficultyEasy" <?= in_array('easy', $difficulty) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="difficultyEasy">Easy</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="difficulty[]" value="medium" id="difficultyMedium" <?= in_array('medium', $difficulty) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="difficultyMedium">Medium</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="difficulty[]" value="hard" id="difficultyHard" <?= in_array('hard', $difficulty) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="difficultyHard">Hard</label>
+            </div>
+          </div>
         </div>
+        
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter me-2"></i> Apply Filters
+          </button>
+          <a href="?" class="btn btn-outline-secondary">
+            <i class="fas fa-times me-2"></i> Clear Filters
+          </a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Recipe Cards Column -->
+    <div class="col-lg-9">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <?php if ($recipes->num_rows > 0): ?>
+          <?php while ($recipe = $recipes->fetch_assoc()): ?>
+            <div class="col">
+              <div class="recipe-card card h-100">
+                <?php
+                  $imgStmt = $conn->prepare("SELECT image_url FROM recipe_images WHERE recipe_id = ? LIMIT 1");
+                  $imgStmt->bind_param("i", $recipe['id']);
+                  $imgStmt->execute();
+                  $imgResult = $imgStmt->get_result()->fetch_assoc();
+                  $imageUrl = $imgResult && !empty($imgResult['image_url']) 
+                    ? '/MEAL-PLANNER-APP/' . ltrim($imgResult['image_url'], '/') 
+                    : '/MEAL-PLANNER-APP/assets/no-image.jpg';
+                ?>
+                <img src="<?= $imageUrl ?>" class="card-img-top" alt="<?= htmlspecialchars($recipe['title']) ?>">
+                
+                <!-- Save Recipe Button -->
+                <button class="save-recipe-btn <?= $recipe['is_saved'] ? 'saved' : '' ?>" 
+                        data-recipe-id="<?= $recipe['id'] ?>"
+                        title="<?= $recipe['is_saved'] ? 'Remove from saved' : 'Save recipe' ?>">
+                  <i class="fas fa-bookmark"></i>
+                </button>
+                
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge badge-cuisine rounded-pill"><?= htmlspecialchars($recipe['cuisine']) ?></span>
+                    <span class="badge badge-difficulty rounded-pill"><?= ucfirst($recipe['difficulty']) ?></span>
+                  </div>
+                  <h5 class="card-title"><?= htmlspecialchars($recipe['title']) ?></h5>
+                  <p class="card-text"><?= htmlspecialchars(substr($recipe['description'], 0, 120)) ?>...</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <small class="text-muted"><i class="far fa-clock me-1"></i> <?= $recipe['prep_time'] + $recipe['cook_time'] ?> mins</small>
+                    <a href="view-recipe.php?id=<?= $recipe['id'] ?>" class="view-btn">
+                      View <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <div class="col-12">
+            <div class="no-results">
+              <i class="far fa-frown-open"></i>
+              <h3 class="mb-3">No recipes found</h3>
+              <p class="text-muted">Try adjusting your search filters or come back later for new recipes!</p>
+              <a href="?" class="btn btn-primary mt-3">Clear Filters</a>
+            </div>
+          </div>
+        <?php endif; ?>
       </div>
-    <?php endif; ?>
+    </div>
   </div>
 </div>
 
@@ -395,6 +520,7 @@ $recipes = $stmt->get_result();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Animation for recipe cards
     const cards = document.querySelectorAll('.recipe-card');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -412,6 +538,59 @@ $recipes = $stmt->get_result();
       card.style.transition = 'all 0.5s ease';
       observer.observe(card);
     });
+
+    // Save recipe functionality
+    document.addEventListener('DOMContentLoaded', function() {
+  // Save recipe functionality
+  document.querySelectorAll('.save-recipe-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Get the recipe ID from the button's data attribute
+      const recipeId = this.getAttribute('data-recipe-id');
+      const isSaved = this.classList.contains('saved'); // Check if the recipe is already saved
+      const icon = this.querySelector('i');
+      
+      // Debug: Log recipeId and action to the console
+      console.log('Recipe ID:', recipeId);
+      console.log('Action:', isSaved ? 'remove' : 'add');
+      
+      if (!recipeId || !isSaved) {
+        console.error('Missing recipe_id or invalid action');
+        return;
+      }
+      
+      const action = isSaved ? 'remove' : 'add'; // If saved, remove; otherwise, add
+      
+      fetch('saved-recipe.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `recipe_id=${recipeId}&action=${action}`  // Ensure recipe_id and action are passed
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (isSaved) {
+            this.classList.remove('saved');
+            icon.style.color = '';
+            this.setAttribute('title', 'Save recipe');
+          } else {
+            this.classList.add('saved');
+            icon.style.color = 'var(--accent-color)';
+            this.setAttribute('title', 'Remove from saved');
+          }
+        } else {
+          console.error('Error in saving/removing recipe: ', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  });
+});
   });
 </script>
 </body>
