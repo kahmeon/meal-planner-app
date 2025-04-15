@@ -222,7 +222,7 @@ require_once 'includes/db.php';
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(216, 214, 214, 0.9);
+      background: rgba(248, 207, 207, 0.9);
       z-index: -1;
       border-radius: 20px;
     }
