@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Start the session only if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 function isLoggedIn() {
   return isset($_SESSION['user_id']);
@@ -26,3 +29,4 @@ function redirectIfNotAdmin() {
     exit();
   }
 }
+?>

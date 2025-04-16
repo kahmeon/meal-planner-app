@@ -127,7 +127,13 @@ $basePath = '/meal-planner-app/';
             <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/recipe-management.php">Recipe Management</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>meal-planning-module/meal-plan.php">Meal Planning</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>community-module/community.php">Community Engagement</a></li>
-            <li><a class="dropdown-item" href="<?= $basePath ?>competition-module/competition.php">Cooking Competition</a></li>
+            <li>
+  <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+    <a class="dropdown-item" href="<?= $basePath ?>competition-module/view-entries.php">Cooking Competition</a>
+  <?php else: ?>
+    <a class="dropdown-item" href="<?= $basePath ?>competition-module/competition.php">Cooking Competition</a>
+  <?php endif; ?>
+</li>
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="#">Tips & Blog</a></li>
@@ -136,7 +142,7 @@ $basePath = '/meal-planner-app/';
 
 
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-          <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>admin/dashboard.php">Admin Panel</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>competition-module/dashboard.php">Admin Panel</a></li>
         <?php endif; ?>
       </ul>
 
