@@ -106,6 +106,7 @@ $basePath = '/meal-planner-app/';
 </head>
 <body>
 
+
 <nav class="navbar navbar-expand-lg navbar-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="<?= $basePath ?>home.php">NomNomPlan</a>
@@ -117,21 +118,22 @@ $basePath = '/meal-planner-app/';
     <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>home.php">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>aboutus.php">About Us</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Our Services
           </a>
           <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
-            <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/recipe-management.php">Recipe Management</a></li>
+            <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/list-recipes.php">Recipe Management</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>meal-planning-module/meal-plan.php">Meal Planning</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>community-module/community.php">Community Engagement</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>competition-module/competition.php">Cooking Competition</a></li>
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="#">Tips & Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Feedback</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>contactus.php">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>feedback.php">Feedback</a></li>
+
 
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
           <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>admin/dashboard.php">Admin Panel</a></li>
