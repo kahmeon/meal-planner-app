@@ -577,7 +577,7 @@ try {
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-        <a href="home.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
+        <a href="home.php" class="nav-link <?= $basePath ?> 'home.php' ? 'active' : '' ?>">
             <i class="bi bi-speedometer2"></i>
             Dashboard
         </a>

@@ -936,3 +936,19 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+CREATE TABLE `saved_recipes` (
+  `user_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `saved_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `saved_recipes`
+--
+
+INSERT INTO `saved_recipes` (`user_id`, `recipe_id`, `saved_at`) VALUES
+(1, 2, '2025-04-15 18:11:11'),
+(1, 4, '2025-04-15 18:09:25'),
+(2, 2, '2025-04-15 16:30:54'),
+(3, 2, '2025-04-16 14:26:53');
