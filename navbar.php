@@ -125,7 +125,7 @@ $basePath = '/meal-planner-app/';
           </a>
           <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
             <li><a class="dropdown-item" href="<?= $basePath ?>recipe-modules/list-recipes.php">Recipe Management</a></li>
-            <li><a class="dropdown-item" href="<?= $basePath ?>meal-planning-module/meal-plan.php">Meal Planning</a></li>
+            <li><a class="dropdown-item" href="<?= $basePath ?>meal-planning-modules/meal-plan.php">Meal Planning</a></li>
             <li><a class="dropdown-item" href="<?= $basePath ?>community-module/community.php">Community Engagement</a></li>
             <li>
   <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
