@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2025 at 04:38 PM
+-- Generation Time: Apr 16, 2025 at 05:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,33 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `avatar`
+--
+
+CREATE TABLE `avatar` (
+  `avatar_id` int(11) NOT NULL,
+  `avatar_url` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `avatar`
+--
+
+INSERT INTO `avatar` (`avatar_id`, `avatar_url`) VALUES
+(1, 'boyavatar5.png'),
+(2, 'boyavatar1.png'),
+(3, 'boyavatar2.png'),
+(4, 'boyavatar3.png'),
+(5, 'boyavatar4.png'),
+(6, 'girlavatar5.png'),
+(7, 'girlavatar1.png'),
+(8, 'girlavatar2.png'),
+(9, 'girlavatar3.png'),
+(10, 'girlavatar4.png');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `comments`
 --
 
@@ -38,6 +65,38 @@ CREATE TABLE `comments` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `community`
+--
+
+CREATE TABLE `community` (
+  `community_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `slogan` text NOT NULL,
+  `banner` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `community`
+--
+
+INSERT INTO `community` (`community_id`, `recipe_id`, `slogan`, `banner`, `created_at`) VALUES
+(3, 16, 'wdw Community Welcome You', 'uploads/recipes/1743996501_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(4, 14, 'ss Community Welcome You', 'uploads/recipes/1743996731_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(5, 4, 'Nasi Lemak Community Welcome You', 'uploads/recipes/1743996773_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(6, 17, 'dwqe Community Welcome You', '/uploads/recipes/1744002369_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(7, 18, 'qwfdwqf Community Welcome You', '/uploads/recipes/1744002737_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(8, 2, 'Nasi Kerabu Community Welcome You', '/uploads/recipes/1744003544_nasi-kerabu1.jpg', '2025-04-12 18:57:44'),
+(9, 3, 'Penang Laksa (Asam Laksa) Community Welcome You', '/uploads/recipes/1744003565_penang-laksa2.jpg', '2025-04-12 18:57:44'),
+(10, 19, 'egver Community Welcome You', '/uploads/recipes/1744003855_char-koay-teow.jpg', '2025-04-12 18:57:44'),
+(11, 5, 'Char Kuey Teow Community Welcome You', '/uploads/recipes/1744004710_char-kway-teow-15.jpg', '2025-04-12 18:57:44'),
+(12, 6, 'Burger Special Community Welcome You', '/uploads/recipes/1744005793_burger-special2.jpg', '2025-04-12 18:57:44'),
+(13, 21, 'private Community Welcome You', '/uploads/recipes/1744006517_nasi-lemak.webp', '2025-04-12 18:57:44'),
+(14, 22, 'ttt Community Welcome You', '/uploads/recipes/1744016854_burger-special2.jpg', '2025-04-12 18:57:44');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `competitions`
 --
 
@@ -47,35 +106,18 @@ CREATE TABLE `competitions` (
   `description` text DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `winner_id` int(11) DEFAULT NULL,
-  `winner_token` varchar(64) DEFAULT NULL,
-  `announced_at` datetime DEFAULT NULL,
-  `winning_recipe_id` int(11) DEFAULT NULL,
-  `winner_announced_at` datetime DEFAULT NULL,
-  `leading_recipe_id` int(11) DEFAULT NULL,
   `prize` varchar(100) DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` varchar(50) DEFAULT 'active',
-  `winner_announced` tinyint(1) DEFAULT 0,
-  `winner_recipe_id` int(11) DEFAULT NULL,
-  `is_featured` tinyint(1) DEFAULT 0,
-  `winner_name` varchar(255) DEFAULT NULL
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `competitions`
 --
 
-INSERT INTO `competitions` (`competition_id`, `title`, `description`, `start_date`, `end_date`, `winner_id`, `winner_token`, `announced_at`, `winning_recipe_id`, `winner_announced_at`, `leading_recipe_id`, `prize`, `image_url`, `created_at`, `updated_at`, `status`, `winner_announced`, `winner_recipe_id`, `is_featured`, `winner_name`) VALUES
-(1, 'Ramadhan Special Recipe Contest', 'Join our festive competition and share your best buka puasa dishes! The top 3 winners will be featured on our homepage.', '2025-04-03', '2025-04-30', 6, NULL, NULL, NULL, '2025-04-16 13:48:56', 2, 'RM300 cash + Gift Hamper + Featured Badge', '../uploads/competitions/1743691865_competition_banner1.png', '2025-04-03 14:51:05', '2025-04-16 05:48:56', 'active', 1, 2, 0, 'Test Winner'),
-(5, 'Sample Competition', NULL, '2025-04-16', '2025-05-16', 6, NULL, NULL, 12, NULL, NULL, NULL, NULL, '2025-04-16 06:16:00', '2025-04-16 06:21:31', 'completed', 0, NULL, 0, 'John Doe'),
-(6, 'Culinary Showdown', NULL, '2025-01-01', '2025-01-15', 6, NULL, NULL, 12, NULL, NULL, NULL, NULL, '2025-04-16 06:21:40', '2025-04-16 06:21:40', 'completed', 0, NULL, 0, 'John Doe'),
-(9, 'hello', 'mee goreng', '2025-04-16', '2025-04-17', NULL, NULL, NULL, NULL, NULL, NULL, '10000', 'uploads/competitions/5ef5b84600fb8359.png', '2025-04-16 03:49:13', '2025-04-16 03:49:13', 'active', 0, NULL, 0, NULL),
-(10, 'Summer Recipe Challenge', 'Submit your best summer dishes!', '2024-06-01', '2024-07-31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'https://example.com/summer-competition.jpg', '2025-04-16 05:47:59', '2025-04-16 05:47:59', 'completed', 0, NULL, 1, NULL),
-(11, 'Test Competition', NULL, '0000-00-00', '2024-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-16 05:51:02', '2025-04-16 05:51:02', 'completed', 0, NULL, 0, NULL),
-(12, 'Test Competition', NULL, '0000-00-00', '2024-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-16 05:52:43', '2025-04-16 05:52:43', 'completed', 0, NULL, 0, NULL);
+INSERT INTO `competitions` (`competition_id`, `title`, `description`, `start_date`, `end_date`, `prize`, `image_url`, `created_at`, `updated_at`) VALUES
+(1, 'Ramadhan Special Recipe Contest', 'Join our festive competition and share your best buka puasa dishes! The top 3 winners will be featured on our homepage.', '2025-04-03', '2025-04-30', 'RM300 cash + Gift Hamper + Featured Badge', '../uploads/competitions/1743691865_competition_banner1.png', '2025-04-03 14:51:05', '2025-04-03 14:51:05');
 
 -- --------------------------------------------------------
 
@@ -89,19 +131,15 @@ CREATE TABLE `competition_entries` (
   `competition_id` int(11) NOT NULL,
   `recipe_id` int(11) NOT NULL,
   `status` varchar(20) DEFAULT 'submitted',
-  `submitted_at` datetime DEFAULT current_timestamp(),
-  `winner_name` varchar(255) DEFAULT NULL
+  `submitted_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `competition_entries`
 --
 
-INSERT INTO `competition_entries` (`entry_id`, `user_id`, `competition_id`, `recipe_id`, `status`, `submitted_at`, `winner_name`) VALUES
-(1, 1, 1, 2, 'approved', '2025-04-04 00:45:43', 'Pow Kah Meon'),
-(2, 1, 9, 2, 'approved', '2025-04-16 12:03:42', NULL),
-(13, 6, 5, 12, 'winner', '2025-04-16 14:17:51', NULL),
-(14, 1, 5, 2, 'approved', '2025-04-16 14:18:32', NULL);
+INSERT INTO `competition_entries` (`entry_id`, `user_id`, `competition_id`, `recipe_id`, `status`, `submitted_at`) VALUES
+(1, 1, 1, 2, 'submitted', '2025-04-04 00:45:43');
 
 -- --------------------------------------------------------
 
@@ -150,15 +188,109 @@ INSERT INTO `feedback` (`id`, `name`, `email`, `message`, `created_at`, `status`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `feeling`
+--
+
+CREATE TABLE `feeling` (
+  `id` int(11) NOT NULL,
+  `emoji` text NOT NULL,
+  `present_content` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `like_comment`
+--
+
+CREATE TABLE `like_comment` (
+  `id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `like_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `meal_plans`
 --
 
 CREATE TABLE `meal_plans` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `meal_date` date NOT NULL,
+  `meal_time` varchar(20) NOT NULL,
   `recipe_id` int(11) DEFAULT NULL,
-  `meal_date` date DEFAULT NULL,
-  `notes` text DEFAULT NULL
+  `recipe` text DEFAULT NULL,
+  `custome_meal` text DEFAULT NULL,
+  `recipe_image` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `post`
+--
+
+CREATE TABLE `post` (
+  `id` int(11) NOT NULL,
+  `community_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `comment` text NOT NULL,
+  `feeling_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_role` enum('Admin','User','Author') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `post_image`
+--
+
+CREATE TABLE `post_image` (
+  `id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `photo_url` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `preset_meal_plans`
+--
+
+CREATE TABLE `preset_meal_plans` (
+  `id` int(11) NOT NULL,
+  `meal_date` date NOT NULL,
+  `meal_time` varchar(20) NOT NULL,
+  `recipe_id` int(11) DEFAULT NULL,
+  `recipe` text DEFAULT NULL,
+  `custom_meal` text DEFAULT NULL,
+  `recipe_image` text DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rating`
+--
+
+CREATE TABLE `rating` (
+  `id` int(11) NOT NULL,
+  `community_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rate_value` decimal(10,0) NOT NULL,
+  `feedback_comment` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -199,9 +331,7 @@ CREATE TABLE `recipes` (
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `admin_note` text DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
-  `instructions` text DEFAULT NULL
+  `admin_note` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -221,8 +351,9 @@ INSERT INTO `recipes` (`id`, `title`, `description`, `ingredients`, `steps`, `cu
 (11, 'Spaghetti Carbonara', 'Classic creamy pasta with egg, parmesan, and beef bacon.', '[\"200g spaghetti\", \"2 egg yolks\", \"1 whole egg\", \"50g parmesan\", \"100g beef bacon\", \"Salt and black pepper\"]', '[\"Cook pasta al dente.\", \"Fry bacon, set aside.\", \"Whisk eggs with cheese.\", \"Toss hot pasta with egg mix and bacon.\", \"Serve with black pepper.\"]', 'Italian', 10, 15, 25, 'medium', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
 (12, 'Ayam Masak Merah', 'Malaysian red tomato chicken stew with aromatic spices.', '[\"500g chicken pieces\", \"1 onion, blended\", \"2 cloves garlic\", \"3 tbsp tomato puree\", \"1 cinnamon stick\", \"1/2 cup coconut milk\", \"Salt and sugar to taste\"]', '[\"Fry chicken until golden, set aside.\", \"Sauté onion, garlic, and tomato puree.\", \"Add cinnamon, return chicken.\", \"Pour in coconut milk and simmer.\"]', 'Malaysian', 15, 30, 45, 'medium', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
 (13, 'Vegetable Stir Fry', 'Colorful vegetables tossed in soy-sesame sauce for a healthy dish.', '[\"1 cup broccoli florets\", \"1 carrot, sliced\", \"1/2 bell pepper\", \"1/2 cup snow peas\", \"1 tbsp soy sauce\", \"1 tsp sesame oil\", \"2 cloves garlic\"]', '[\"Heat oil and sauté garlic.\", \"Add vegetables and stir-fry 5 mins.\", \"Add soy sauce and sesame oil.\", \"Toss well and serve.\"]', 'Chinese', 10, 10, 20, 'easy', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
-(14, 'tt', 'ss', '[\"1\"]', '[\"1\"]', 'ss', 1, 1, 1, 'easy', '1', 'approved', 1, 0, 1, '2025-04-07 03:07:00', '2025-04-16 03:28:19', NULL),
-(15, 'uu', 'wwwww', '[\"www\"]', '[\"www\"]', 'ww', 22, 22, 22, 'easy', 'www', 'rejected', 1, 0, 1, '2025-04-07 03:20:33', '2025-04-16 03:47:27', 'the recipes is unclear'),
+(14, 'ss', 'ss', '[\"1\"]', '[\"1\"]', 'ss', 1, 1, 1, 'easy', '1', 'pending', 1, 0, 1, '2025-04-07 03:07:00', '2025-04-07 03:07:00', NULL),
+(15, 'ww', 'ww', '[\"www\"]', '[\"www\"]', 'ww', 22, 22, 22, 'easy', 'www', 'pending', 1, 0, 1, '2025-04-07 03:20:33', '2025-04-07 03:20:33', NULL),
+(16, 'wdw', 'dwqd', '[\"efewf\"]', '[\"effw\"]', 'qwddqw', 33, 33, 33, 'easy', 'efwwe', 'pending', 1, 0, 1, '2025-04-07 03:27:06', '2025-04-07 03:27:06', NULL),
 (17, 'dwqe', 'efwef', '[\"edqw\"]', '[\"ewfef\"]', 'f32f', 33, 33, 33, '', 'ewfewf', 'pending', 1, 0, 2, '2025-04-07 05:06:09', '2025-04-07 05:06:09', NULL),
 (18, 'qwfdwqf', 'ewfef', '[\"dcvsda\"]', '[\"wefaef\"]', 'ewfewf', 22, 22, 22, 'medium', 'ewfwf', 'pending', 1, 0, 2, '2025-04-07 05:12:17', '2025-04-07 05:12:17', NULL),
 (19, 'egver', 'gregwe', '[\"egfwes\"]', '[\"ewfw\"]', 'eswe', 77, 77, 77, 'medium', 'ewffw', 'pending', 1, 0, 2, '2025-04-07 05:30:55', '2025-04-07 05:30:55', NULL),
@@ -247,6 +378,7 @@ CREATE TABLE `recipe_images` (
 --
 
 INSERT INTO `recipe_images` (`id`, `recipe_id`, `image_url`) VALUES
+(20, 16, 'uploads/recipes/1743996501_nasi-lemak.webp'),
 (21, 14, 'uploads/recipes/1743996731_nasi-lemak.webp'),
 (22, 4, 'uploads/recipes/1743996773_nasi-lemak.webp'),
 (23, 17, '/uploads/recipes/1744002369_nasi-lemak.webp'),
@@ -269,8 +401,7 @@ INSERT INTO `recipe_images` (`id`, `recipe_id`, `image_url`) VALUES
 (40, 21, '/uploads/recipes/1744006517_nasi-lemak.webp'),
 (41, 22, '/uploads/recipes/1744016854_burger-special2.jpg'),
 (42, 22, '/uploads/recipes/1744016854_burger-special1.jpg'),
-(43, 22, '/uploads/recipes/1744016854_burger-special.jpg'),
-(44, 15, '/uploads/recipes/1744741106_burger-special2.jpg');
+(43, 22, '/uploads/recipes/1744016854_burger-special.jpg');
 
 -- --------------------------------------------------------
 
@@ -296,6 +427,7 @@ INSERT INTO `recipe_tags` (`recipe_id`, `tag_id`) VALUES
 (4, 3),
 (6, 3),
 (15, 3),
+(16, 3),
 (17, 3),
 (18, 5),
 (19, 1),
@@ -319,24 +451,16 @@ CREATE TABLE `recipe_views` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `saved_recipes`
+-- Table structure for table `reply_comment`
 --
 
-CREATE TABLE `saved_recipes` (
+CREATE TABLE `reply_comment` (
+  `id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `recipe_id` int(11) NOT NULL,
-  `saved_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `content` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `saved_recipes`
---
-
-INSERT INTO `saved_recipes` (`user_id`, `recipe_id`, `saved_at`) VALUES
-(1, 2, '2025-04-15 18:11:11'),
-(1, 4, '2025-04-15 18:09:25'),
-(2, 2, '2025-04-15 16:30:54'),
-(3, 2, '2025-04-16 14:26:53');
 
 -- --------------------------------------------------------
 
@@ -384,11 +508,9 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `avatar_url` varchar(255) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('user','admin') DEFAULT 'user',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` enum('active','pending','inactive') DEFAULT 'pending'
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -397,11 +519,52 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
 (1, 'Pow Kah Meon', 'khmeon058@1utar.my', '$2y$10$8lWMm8bnrcEqk1PGez1eM.ot6BQT9i7PmizKtiYLs7cxSYdAzMI5S', 'user', '2025-03-28 05:30:54'),
-(2, 'Carmen', 'khmeon058@gmail.com', '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52');
+(2, 'Carmen', 'khmeon058@gmail.com', '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52'),
+(3, 'User', 'user@example.com', '$2y$10$ZruuRnCgeLzPZ9kh3funheJyP.I.wmwy5g3a4Os2h57mCVXoIeYQm', 'user', '2025-04-06 20:44:40'),
+(4, 'lennon tan', 'lennontan1232@gmail.com', '$2y$10$tkKh2kE5wPCo4n/ms6971u0oEK457UkfzECufPQ9WR3x6PSpWoSEa', 'admin', '2025-04-12 00:55:21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_community`
+--
+
+CREATE TABLE `user_community` (
+  `user_comm_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_avatar_id` int(11) NOT NULL,
+  `update_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_community`
+--
+
+INSERT INTO `user_community` (`user_comm_id`, `user_id`, `user_avatar_id`, `update_at`) VALUES
+(1, 4, 3, '2025-04-12 18:06:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_favor`
+--
+
+CREATE TABLE `user_favor` (
+  `id` int(11) NOT NULL,
+  `community_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `avatar`
+--
+ALTER TABLE `avatar`
+  ADD PRIMARY KEY (`avatar_id`);
 
 --
 -- Indexes for table `comments`
@@ -410,6 +573,12 @@ ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `recipe_id` (`recipe_id`);
+
+--
+-- Indexes for table `community`
+--
+ALTER TABLE `community`
+  ADD PRIMARY KEY (`community_id`);
 
 --
 -- Indexes for table `competitions`
@@ -439,12 +608,46 @@ ALTER TABLE `feedback`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `feeling`
+--
+ALTER TABLE `feeling`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `like_comment`
+--
+ALTER TABLE `like_comment`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `meal_plans`
 --
 ALTER TABLE `meal_plans`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `recipe_id` (`recipe_id`);
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `post`
+--
+ALTER TABLE `post`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `post_image`
+--
+ALTER TABLE `post_image`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `preset_meal_plans`
+--
+ALTER TABLE `preset_meal_plans`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `rating`
+--
+ALTER TABLE `rating`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `ratings`
@@ -484,11 +687,10 @@ ALTER TABLE `recipe_views`
   ADD KEY `recipe_id` (`recipe_id`);
 
 --
--- Indexes for table `saved_recipes`
+-- Indexes for table `reply_comment`
 --
-ALTER TABLE `saved_recipes`
-  ADD PRIMARY KEY (`user_id`,`recipe_id`),
-  ADD KEY `fk_recipe` (`recipe_id`);
+ALTER TABLE `reply_comment`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `structured_ingredients`
@@ -513,8 +715,26 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email_2` (`email`);
 
 --
+-- Indexes for table `user_community`
+--
+ALTER TABLE `user_community`
+  ADD PRIMARY KEY (`user_comm_id`);
+
+--
+-- Indexes for table `user_favor`
+--
+ALTER TABLE `user_favor`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `avatar`
+--
+ALTER TABLE `avatar`
+  MODIFY `avatar_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `comments`
@@ -523,16 +743,22 @@ ALTER TABLE `comments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `community`
+--
+ALTER TABLE `community`
+  MODIFY `community_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
 -- AUTO_INCREMENT for table `competitions`
 --
 ALTER TABLE `competitions`
-  MODIFY `competition_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `competition_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `competition_entries`
 --
 ALTER TABLE `competition_entries`
-  MODIFY `entry_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `entry_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -547,9 +773,45 @@ ALTER TABLE `feedback`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `feeling`
+--
+ALTER TABLE `feeling`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `like_comment`
+--
+ALTER TABLE `like_comment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `meal_plans`
 --
 ALTER TABLE `meal_plans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post`
+--
+ALTER TABLE `post`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post_image`
+--
+ALTER TABLE `post_image`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `preset_meal_plans`
+--
+ALTER TABLE `preset_meal_plans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rating`
+--
+ALTER TABLE `rating`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -562,13 +824,13 @@ ALTER TABLE `ratings`
 -- AUTO_INCREMENT for table `recipes`
 --
 ALTER TABLE `recipes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `recipe_images`
 --
 ALTER TABLE `recipe_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `recipe_views`
@@ -577,10 +839,10 @@ ALTER TABLE `recipe_views`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `recipe_votes`
+-- AUTO_INCREMENT for table `reply_comment`
 --
-ALTER TABLE `recipe_votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `reply_comment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `structured_ingredients`
@@ -598,7 +860,19 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `user_community`
+--
+ALTER TABLE `user_community`
+  MODIFY `user_comm_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `user_favor`
+--
+ALTER TABLE `user_favor`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -618,13 +892,6 @@ ALTER TABLE `competition_entries`
   ADD CONSTRAINT `competition_entries_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `competition_entries_ibfk_2` FOREIGN KEY (`competition_id`) REFERENCES `competitions` (`competition_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `competition_entries_ibfk_3` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `meal_plans`
---
-ALTER TABLE `meal_plans`
-  ADD CONSTRAINT `meal_plans_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `meal_plans_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`);
 
 --
 -- Constraints for table `ratings`
@@ -658,15 +925,6 @@ ALTER TABLE `recipe_tags`
 ALTER TABLE `recipe_views`
   ADD CONSTRAINT `recipe_views_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `recipe_views_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `saved_recipes`
---
-ALTER TABLE `saved_recipes`
-  ADD CONSTRAINT `fk_recipe` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `saved_recipes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `saved_recipes_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `structured_ingredients`
