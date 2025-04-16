@@ -338,6 +338,57 @@ INSERT INTO `saved_recipes` (`user_id`, `recipe_id`, `saved_at`) VALUES
 (2, 2, '2025-04-15 16:30:54'),
 (3, 2, '2025-04-16 14:26:53');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `structured_ingredients`
+--
+
+CREATE TABLE `structured_ingredients` (
+  `ingredient_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `quantity` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tags`
+--
+
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tags`
+--
+
+INSERT INTO `tags` (`id`, `name`) VALUES
+(4, 'Gluten-Free'),
+(3, 'Quick Meal'),
+(5, 'Seafood'),
+(1, 'Spicy'),
+(6, 'Sweet'),
+(2, 'Vegetarian');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('user','admin') DEFAULT 'user',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','pending','inactive') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -346,43 +397,7 @@ INSERT INTO `saved_recipes` (`user_id`, `recipe_id`, `saved_at`) VALUES
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
 (1, 'Pow Kah Meon', 'khmeon058@1utar.my', '$2y$10$8lWMm8bnrcEqk1PGez1eM.ot6BQT9i7PmizKtiYLs7cxSYdAzMI5S', 'user', '2025-03-28 05:30:54'),
-(2, 'Carmen', 'khmeon058@gmail.com', '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52'),
-(3, 'User', 'user@example.com', '$2y$10$ZruuRnCgeLzPZ9kh3funheJyP.I.wmwy5g3a4Os2h57mCVXoIeYQm', 'user', '2025-04-06 20:44:40'),
-(4, 'lennon tan', 'lennontan1232@gmail.com', '$2y$10$tkKh2kE5wPCo4n/ms6971u0oEK457UkfzECufPQ9WR3x6PSpWoSEa', 'admin', '2025-04-12 00:55:21');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_community`
---
-
-CREATE TABLE `user_community` (
-  `user_comm_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `user_avatar_id` int(11) NOT NULL,
-  `update_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `user_community`
---
-
-INSERT INTO `user_community` (`user_comm_id`, `user_id`, `user_avatar_id`, `update_at`) VALUES
-(1, 4, 3, '2025-04-12 18:06:03');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_favor`
---
-
-CREATE TABLE `user_favor` (
-  `id` int(11) NOT NULL,
-  `community_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
->>>>>>> 4efdf603a00a9f0623a827973dc1fb469d85881a
+(2, 'Carmen', 'khmeon058@gmail.com', '$2y$10$tl3lNM6lFuetmDKWD9x9oOf/naPp6/tPMlgGdssBNjDd2kWFjQGpm', 'admin', '2025-04-03 03:15:52');
 
 --
 -- Indexes for dumped tables
@@ -583,7 +598,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
