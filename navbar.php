@@ -136,7 +136,7 @@ $basePath = '/meal-planner-app/';
 </li>
           </ul>
         </li>
-        <li class="nav-item"><a class="nav-link" href="#">Tips & Blog</a></li>
+       
         <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>contactus.php">Contact Us</a></li>
         <li class="nav-item"><a class="nav-link" href="<?= $basePath ?>feedback.php">Feedback</a></li>
 
