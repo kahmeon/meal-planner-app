@@ -324,7 +324,7 @@ if ($role === 'admin') {
 
 // Add filters
 if (!empty($statusFilter)) {
-    $whereClauses[] = "status = ?";
+  $whereClauses[] = "recipes.status = ?";
     $params[] = $statusFilter;
     $types .= 's';
 }

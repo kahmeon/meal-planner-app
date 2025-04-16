@@ -569,7 +569,7 @@ try {
 </head>
 <body>
     <div class="d-flex">
-       <!-- Sidebar -->
+     <!-- Sidebar -->
 <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
     <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span class="fs-4">Admin Panel</span>
@@ -577,22 +577,25 @@ try {
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-        <a href="home.php" class="nav-link <?= $basePath ?> 'home.php' ? 'active' : '' ?>">
+        <a href="../home.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
             <i class="bi bi-speedometer2"></i>
             Dashboard
         </a>
     </li>
-            <a href="recipes.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'recipes.php' ? 'active' : '' ?>">
-                <i class="bi bi-journal-bookmark"></i>
-                Recipes
-            </a>
-        </li>
-        <li>
-            <a href="competition.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'competitions.php' ? 'active' : '' ?>">
-                <i class="bi bi-trophy"></i>
-                Competitions
-            </a>
-        </li>
+    <li>
+        <a href="../recipe-modules/list-recipes.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'recipes.php' ? 'active' : '' ?>">
+            <i class="bi bi-journal-bookmark"></i>
+            Recipes
+        </a>
+    </li>
+    <li>
+        <a href="../competition-module/competition.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'competition.php' ? 'active' : '' ?>">
+            <i class="bi bi-trophy"></i>
+            Competitions
+        </a>
+    </li>
+</ul>
+
     </ul>
     <hr>
     <div class="dropdown">

@@ -16,7 +16,7 @@ $recipe_id = (int) $_GET['id'];
 // Check if user has saved this recipe
 $isSaved = false;
 if ($loggedIn) {
-  $saveCheck = $conn->prepare("SELECT 1 FROM saved_recipes WHERE user_id = ? AND recipe_id = ? LIMIT 1");
+    $saveCheck = $conn->prepare("SELECT 1 FROM saved_recipes WHERE user_id = ? AND recipe_id = ? LIMIT 1");
     $saveCheck->bind_param("ii", $user_id, $recipe_id);
     $saveCheck->execute();
     $isSaved = $saveCheck->get_result()->num_rows > 0;
@@ -167,7 +167,6 @@ function formatNutritionFacts($nutrition) {
         return '<div class="alert alert-info mb-0">No nutrition information provided.</div>';
     }
 
-    // Split by new lines and filter out empty lines
     $lines = array_filter(explode("\n", $nutrition), function($line) {
         return !empty(trim($line));
     });
@@ -264,7 +263,9 @@ function formatNutritionFacts($nutrition) {
     .recipe-slider img {
       width: 100%;
       height: 400px;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: #f8f9fa;
+      cursor: zoom-in;
     }
     
     .swiper-button-next, .swiper-button-prev {
@@ -474,6 +475,84 @@ function formatNutritionFacts($nutrition) {
       transform: scale(1.2);
     }
     
+    /* Fullscreen image viewer */
+    .image-viewer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .image-viewer-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+    }
+    
+    .image-viewer-img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+    }
+    
+    .image-viewer-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10000;
+      transition: all 0.3s ease;
+    }
+    
+    .image-viewer-nav:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .image-viewer-prev {
+      left: 20px;
+    }
+    
+    .image-viewer-next {
+      right: 20px;
+    }
+    
+    .image-viewer-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 10000;
+    }
+    
+    .image-viewer-counter {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px 15px;
+      border-radius: 20px;
+    }
+    
     @media print {
       .print-hidden {
         display: none !important;
@@ -516,11 +595,36 @@ function formatNutritionFacts($nutrition) {
       .time-box span {
         font-size: 1.2rem;
       }
+      
+      .image-viewer-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      .image-viewer-prev {
+        left: 10px;
+      }
+      
+      .image-viewer-next {
+        right: 10px;
+      }
     }
   </style>
 </head>
 <body>
 <?php include '../navbar.php'; ?>
+
+<!-- Fullscreen Image Viewer -->
+<div class="image-viewer-overlay" id="imageViewer">
+  <div class="image-viewer-container">
+    <span class="image-viewer-close" id="closeViewer">&times;</span>
+    <div class="image-viewer-nav image-viewer-prev" id="prevImage"><i class="bi bi-chevron-left"></i></div>
+    <img class="image-viewer-img" id="viewerImage" src="">
+    <div class="image-viewer-nav image-viewer-next" id="nextImage"><i class="bi bi-chevron-right"></i></div>
+    <div class="image-viewer-counter" id="imageCounter"></div>
+  </div>
+</div>
 
 <div class="container py-5">
   <div class="print-header print-hidden" style="display: none;">
@@ -540,9 +644,13 @@ function formatNutritionFacts($nutrition) {
       <?php if (!empty($images)): ?>
         <div class="swiper recipe-slider print-hidden">
           <div class="swiper-wrapper">
-            <?php foreach ($images as $img): ?>
+            <?php foreach ($images as $index => $img): ?>
               <div class="swiper-slide">
-              <img src="/meal-planner-app/<?= ltrim($img, '/') ?>" alt="<?= htmlspecialchars($recipe['title']) ?>">
+                <img src="/meal-planner-app/<?= ltrim($img, '/') ?>" 
+                     alt="<?= htmlspecialchars($recipe['title']) ?>" 
+                     class="recipe-image" 
+                     data-index="<?= $index ?>"
+                     data-src="/meal-planner-app/<?= ltrim($img, '/') ?>">
               </div>
             <?php endforeach; ?>
           </div>
@@ -680,6 +788,7 @@ function formatNutritionFacts($nutrition) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
+  // Initialize Swiper
   const swiper = new Swiper('.recipe-slider', {
     loop: true,
     navigation: {
@@ -722,6 +831,87 @@ function formatNutritionFacts($nutrition) {
       }
     });
   }
+  
+  // Fullscreen Image Viewer
+  const imageViewer = document.getElementById('imageViewer');
+  const viewerImage = document.getElementById('viewerImage');
+  const closeViewer = document.getElementById('closeViewer');
+  const prevImage = document.getElementById('prevImage');
+  const nextImage = document.getElementById('nextImage');
+  const imageCounter = document.getElementById('imageCounter');
+  
+  let currentImageIndex = 0;
+  const recipeImages = Array.from(document.querySelectorAll('.recipe-image'));
+  const imageUrls = recipeImages.map(img => img.dataset.src);
+  
+  // Open image viewer when clicking on an image
+  recipeImages.forEach((img, index) => {
+    img.addEventListener('click', () => {
+      currentImageIndex = index;
+      updateViewerImage();
+      imageViewer.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  
+  // Close image viewer
+  closeViewer.addEventListener('click', () => {
+    imageViewer.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  });
+  
+  // Navigate between images
+  prevImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+    updateViewerImage();
+  });
+  
+  nextImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+    updateViewerImage();
+  });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (imageViewer.style.display === 'flex') {
+      if (e.key === 'Escape') {
+        imageViewer.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      } else if (e.key === 'ArrowLeft') {
+        currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+        updateViewerImage();
+      } else if (e.key === 'ArrowRight') {
+        currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+        updateViewerImage();
+      }
+    }
+  });
+  
+  // Update the viewer image and counter
+  function updateViewerImage() {
+    viewerImage.src = imageUrls[currentImageIndex];
+    imageCounter.textContent = `${currentImageIndex + 1} / ${imageUrls.length}`;
+    
+    // Preload adjacent images
+    const prevIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+    const nextIndex = (currentImageIndex + 1) % imageUrls.length;
+    
+    const preloadPrev = new Image();
+    preloadPrev.src = imageUrls[prevIndex];
+    
+    const preloadNext = new Image();
+    preloadNext.src = imageUrls[nextIndex];
+  }
+  
+  // Close when clicking outside the image
+  imageViewer.addEventListener('click', (e) => {
+    if (e.target === imageViewer) {
+      imageViewer.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  });
 </script>
 </body>
 </html>

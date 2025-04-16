@@ -4,6 +4,9 @@ session_start();
 
 $current_date = date('Y-m-d H:i:s');
 
+// Check if user is logged in
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
 // 1. MAIN COMPETITIONS QUERY (FIXED)
 $sql = "
     SELECT 
@@ -54,16 +57,40 @@ $featured_winner_sql = "
 $featured_winner_result = $conn->query($featured_winner_sql);
 $featured_winner = $featured_winner_result->num_rows > 0 ? $featured_winner_result->fetch_assoc() : null;
 
-// DEBUGGING: Uncomment to verify queries work
-/*
-echo "<h3>Debug Info</h3>";
-echo "<pre>Featured Winner: "; print_r($featured_winner); echo "</pre>";
-echo "<pre>All Competitions: ";
-while($row = $result->fetch_assoc()) { 
-    if($row['status'] == 'completed') print_r($row); 
+// 3. USER'S JOINED COMPETITIONS (NEW)
+// 3. USER'S JOINED COMPETITIONS (UPDATED)
+$user_competitions = [];
+if ($user_id) {
+    $user_competitions_sql = "
+        SELECT 
+            c.competition_id,
+            c.title,
+            c.image_url,
+            c.status AS competition_status,
+            c.end_date,
+            e.entry_id,
+            e.status AS entry_status,
+            e.submitted_at,
+            (SELECT COUNT(*) FROM competition_votes WHERE entry_id = e.entry_id) AS vote_count,
+            r.title AS recipe_title,
+            r.image_url AS recipe_image
+        FROM competition_entries e
+        JOIN competitions c ON e.competition_id = c.competition_id
+        LEFT JOIN recipes r ON e.recipe_id = r.id
+        WHERE e.user_id = ?
+        ORDER BY e.submitted_at DESC
+    ";
+    
+    $stmt = $conn->prepare($user_competitions_sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+    
+    while ($row = $user_result->fetch_assoc()) {
+        $user_competitions[] = $row;
+    }
+    $stmt->close();
 }
-echo "</pre>";
-*/
 ?>
 
 <!DOCTYPE html>
@@ -519,6 +546,87 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: auto;
 }
 
+/* User Competitions Section */
+.user-competitions {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--box-shadow);
+}
+
+.user-competition-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    background-color: var(--light-bg);
+    margin-bottom: 1rem;
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
+}
+
+.user-competition-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.user-competition-card.completed {
+    border-left-color: var(--success-color);
+}
+
+.user-competition-card.winner {
+    border-left-color: var(--gold-color);
+    background-color: var(--gold-light);
+}
+
+.user-competition-image {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--border-radius);
+    object-fit: cover;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+.user-competition-info {
+    flex-grow: 1;
+}
+
+.user-competition-status {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.status-pending {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.status-approved {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.status-winner {
+    background-color: var(--gold-color);
+    color: white;
+}
+
+.status-finalist {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.user-competition-actions {
+    margin-left: 1.5rem;
+    flex-shrink: 0;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 992px) {
     .page-header h1 {
@@ -531,6 +639,24 @@ h1, h2, h3, h4, h5, h6 {
     
     .card-img-container {
         height: 180px;
+    }
+    
+    .user-competition-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-competition-image {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        width: 100%;
+        height: 120px;
+    }
+    
+    .user-competition-actions {
+        margin-left: 0;
+        margin-top: 1rem;
+        width: 100%;
     }
 }
 
@@ -578,6 +704,10 @@ h1, h2, h3, h4, h5, h6 {
         bottom: 20px;
         right: 20px;
     }
+    
+    .user-competitions {
+        padding: 1.5rem;
+    }
 }
     </style>
 </head>
@@ -599,145 +729,221 @@ h1, h2, h3, h4, h5, h6 {
                 </div>
             </div>
 
-            
-           <!-- Improved Recent Winners Section -->
-<h3 class="section-title animate__animated animate__fadeIn">
-    <i class="bi bi-trophy-fill me-2" style="color: var(--gold-color);"></i>Recent Winners
-</h3>
-
-<div class="row g-4 mb-5">
-    <?php 
-    // Reset pointer and find completed competitions with winners
-    $result->data_seek(0);
-    $winner_shown = false;
-    while ($competition = $result->fetch_assoc()): 
-        if ($competition['status'] == 'completed' && !empty($competition['winner_name'])): 
-            $winner_shown = true;
-            $days_since_ended = floor((time() - strtotime($competition['end_date'])) / (60 * 60 * 24));
-            $prize_value = isset($competition['prize']) ? 'Prize: $' . number_format($competition['prize'], 0) : 'Featured Recipe';
-    ?>
-    <div class="col-lg-6 animate__animated animate__fadeInUp">
-        <div class="winner-card h-100 position-relative">
-            <!-- Winner Crown Badge -->
-            <div class="position-absolute top-0 start-0 m-3">
-                <div class="winner-crown bg-warning text-dark px-2 py-1 rounded-pill d-flex align-items-center">
-                    <i class="bi bi-trophy-fill me-1"></i>
-                    <small class="fw-bold">Winner</small>
-                </div>
-            </div>
-            
-            <!-- Recipe Image with Hover Effect -->
-            <div class="card-img-container position-relative overflow-hidden rounded-top" style="height: 200px;">
-                <img src="<?= htmlspecialchars($competition['winning_recipe_image'] ?? '../assets/images/default-recipe.jpg') ?>" 
-                    class="card-img-top h-100 w-100 object-fit-cover transition-transform" 
-                    alt="Winning Recipe">
+            <!-- User's Competitions Section (NEW) -->
+            <?php if ($user_id && !empty($user_competitions)): ?>
+            <div class="user-competitions animate__animated animate__fadeIn">
+                <h3 class="section-title"><i class="bi bi-person-check me-2"></i>Your Competition Entries</h3>
                 
-                <!-- Competition Title Overlay -->
-                <div class="position-absolute bottom-0 start-0 end-0 p-3 text-white" 
-                    style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
-                    <h5 class="mb-0 text-truncate"><?= htmlspecialchars($competition['title']) ?></h5>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <!-- Competition Meta -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
-                        <i class="bi bi-calendar me-1"></i><?= $days_since_ended ?> days ago
-                    </span>
-                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
-                        <i class="bi bi-people me-1"></i><?= $competition['entry_count'] ?> entries
-                    </span>
-                </div>
-                
-                <!-- Winner Profile -->
-                <div class="d-flex align-items-center mb-3 p-3 bg-light rounded-3">
-                    <img src="<?= htmlspecialchars($competition['winner_avatar'] ?? '../assets/default-avatar.jpg') ?>" 
-                        class="rounded-circle me-3 border border-3 border-warning" 
-                        width="60" height="60" alt="Winner"
-                        style="object-fit: cover;">
-                    <div>
-                        <h5 class="mb-1"><?= htmlspecialchars($competition['winner_name']) ?></h5>
-                        <small class="text-muted d-flex align-items-center">
-                            <i class="bi bi-award-fill me-1 text-warning"></i>
-                            <?= $prize_value ?>
-                        </small>
+                <?php foreach ($user_competitions as $entry): 
+                    $is_winner = $entry['entry_status'] == 'winner';
+                    $is_completed = $entry['competition_status'] == 'completed';
+                    $days_remaining = $is_completed ? 0 : ceil((strtotime($entry['end_date']) - time()) / (60 * 60 * 24));
+                ?>
+                <div class="user-competition-card <?= $is_winner ? 'winner' : '' ?> <?= $is_completed ? 'completed' : '' ?>">
+                    <img src="<?= htmlspecialchars($entry['image_url'] ?? '../assets/images/default-competition.jpg') ?>" 
+                         class="user-competition-image" 
+                         alt="<?= htmlspecialchars($entry['title']) ?>">
+                    
+                    <div class="user-competition-info">
+                        <span class="user-competition-status 
+                            <?= $is_winner ? 'status-winner' : 
+                               ($entry['entry_status'] == 'approved' ? 'status-approved' : 
+                               ($entry['entry_status'] == 'finalist' ? 'status-finalist' : 'status-pending')) ?>">
+                            <?= $is_winner ? 'Winner' : 
+                               ($entry['entry_status'] == 'approved' ? 'Approved' : 
+                               ($entry['entry_status'] == 'finalist' ? 'Finalist' : 'Pending')) ?>
+                        </span>
+                        
+                        <h5 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h5>
+                        
+                        <p class="mb-1 text-muted small">
+                            <?php if ($is_completed): ?>
+                                <i class="bi bi-calendar-check"></i> Ended <?= date('M j, Y', strtotime($entry['end_date'])) ?>
+                            <?php else: ?>
+                                <i class="bi bi-clock"></i> <?= $days_remaining ?> days remaining
+                            <?php endif; ?>
+                        </p>
+                        
+                        <?php if (!empty($entry['recipe_title'])): ?>
+                        <p class="mb-0 small">
+                            <i class="bi bi-bookmark-heart"></i> 
+                            <strong>Your Recipe:</strong> <?= htmlspecialchars($entry['recipe_title']) ?>
+                        </p>
+                        <?php endif; ?>
+                        
+                        <?php if ($entry['vote_count'] > 0): ?>
+                        <p class="mb-0 small text-success">
+                            <i class="bi bi-heart-fill"></i> 
+                            <strong><?= $entry['vote_count'] ?> votes</strong>
+                        </p>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="user-competition-actions">
+                        <a href="view-competition-details.php?id=<?= $entry['competition_id'] ?>" 
+                           class="btn btn-sm btn-outline-primary mb-1 w-100">
+                           <i class="bi bi-eye"></i> View
+                        </a>
+                        <?php if (!$is_completed): ?>
+                        
+                        <?php endif; ?>
+                        <?php if ($is_winner): ?>
+                        <span class="badge bg-warning text-dark w-100">
+                            <i class="bi bi-trophy"></i> Winner!
+                        </span>
+                        <?php endif; ?>
                     </div>
                 </div>
+                <?php endforeach; ?>
+            </div>
+            <?php elseif ($user_id): ?>
+            <div class="empty-state animate__animated animate__fadeIn">
+                <i class="bi bi-emoji-frown"></i>
+                <h4 class="mb-3">No Competition Entries Yet</h4>
+                <p class="text-muted">You haven't joined any competitions yet. Browse our current competitions and submit your entry!</p>
+                <a href="#current-competitions" class="btn btn-primary rounded-pill px-4 mt-2">
+                    <i class="bi bi-arrow-down me-1"></i> View Current Competitions
+                </a>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Improved Recent Winners Section -->
+            <h3 class="section-title animate__animated animate__fadeIn">
+                <i class="bi bi-trophy-fill me-2" style="color: var(--gold-color);"></i>Recent Winners
+            </h3>
 
-                <!-- Winning Recipe Details -->
-                <div class="winner-recipe bg-light p-3 rounded-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0 d-flex align-items-center">
-                            <i class="bi bi-bookmark-heart-fill me-2" style="color: var(--primary-color);"></i>
-                            Winning Recipe
-                        </h6>
-                        <div class="recipe-rating">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-half text-warning"></i>
+            <div class="row g-4 mb-5">
+                <?php 
+                // Reset pointer and find completed competitions with winners
+                $result->data_seek(0);
+                $winner_shown = false;
+                while ($competition = $result->fetch_assoc()): 
+                    if ($competition['status'] == 'completed' && !empty($competition['winner_name'])): 
+                        $winner_shown = true;
+                        $days_since_ended = floor((time() - strtotime($competition['end_date'])) / (60 * 60 * 24));
+                        $prize_value = isset($competition['prize']) ? 'Prize: $' . number_format($competition['prize'], 0) : 'Featured Recipe';
+                ?>
+                <div class="col-lg-6 animate__animated animate__fadeInUp">
+                    <div class="winner-card h-100 position-relative">
+                        <!-- Winner Crown Badge -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <div class="winner-crown bg-warning text-dark px-2 py-1 rounded-pill d-flex align-items-center">
+                                <i class="bi bi-trophy-fill me-1"></i>
+                                <small class="fw-bold">Winner</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Recipe Image with Hover Effect -->
+                        <div class="card-img-container position-relative overflow-hidden rounded-top" style="height: 200px;">
+                            <img src="<?= htmlspecialchars($competition['winning_recipe_image'] ?? '../assets/images/default-recipe.jpg') ?>" 
+                                class="card-img-top h-100 w-100 object-fit-cover transition-transform" 
+                                alt="Winning Recipe">
+                            
+                            <!-- Competition Title Overlay -->
+                            <div class="position-absolute bottom-0 start-0 end-0 p-3 text-white" 
+                                style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
+                                <h5 class="mb-0 text-truncate"><?= htmlspecialchars($competition['title']) ?></h5>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- Competition Meta -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-calendar me-1"></i><?= $days_since_ended ?> days ago
+                                </span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                                    <i class="bi bi-people me-1"></i><?= $competition['entry_count'] ?> entries
+                                </span>
+                            </div>
+                            
+                            <!-- Winner Profile -->
+                            <div class="d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                <img src="<?= htmlspecialchars($competition['winner_avatar'] ?? '../assets/default-avatar.jpg') ?>" 
+                                    class="rounded-circle me-3 border border-3 border-warning" 
+                                    width="60" height="60" alt="Winner"
+                                    style="object-fit: cover;">
+                                <div>
+                                    <h5 class="mb-1"><?= htmlspecialchars($competition['winner_name']) ?></h5>
+                                    <small class="text-muted d-flex align-items-center">
+                                        <i class="bi bi-award-fill me-1 text-warning"></i>
+                                        <?= $prize_value ?>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Winning Recipe Details -->
+                            <div class="winner-recipe bg-light p-3 rounded-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 d-flex align-items-center">
+                                        <i class="bi bi-bookmark-heart-fill me-2" style="color: var(--primary-color);"></i>
+                                        Winning Recipe
+                                    </h6>
+                                    <div class="recipe-rating">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-half text-warning"></i>
+                                    </div>
+                                </div>
+                                
+                                <h5 class="mb-2"><?= htmlspecialchars($competition['winning_recipe_title']) ?></h5>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#winnerModal<?= $competition['competition_id'] ?>">
+                                        <i class="bi bi-info-circle me-1"></i> Competition Details
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <h5 class="mb-2"><?= htmlspecialchars($competition['winning_recipe_title']) ?></h5>
-                    
-                    <div class="d-flex justify-content-between align-items-center mt-3">
+                </div>
 
-                        <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#winnerModal<?= $competition['competition_id'] ?>">
-                            <i class="bi bi-info-circle me-1"></i> Competition Details
+                <!-- Winning Recipe Details Modal -->
+                <div class="modal fade" id="winnerModal<?= $competition['competition_id'] ?>" tabindex="-1" aria-labelledby="winnerModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-danger" id="winnerModalLabel"><?= htmlspecialchars($competition['title']) ?> Winner</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="winner-recipe bg-light p-4 rounded-3">
+                                    <h6 class="text-primary mb-3">Winning Recipe</h6>
+                                    <h5 class="mb-3"><?= htmlspecialchars($competition['winning_recipe_title']) ?></h5>
+                                    
+                                    <p class="mb-2">By <strong><?= htmlspecialchars($competition['winner_name']) ?></strong></p>
+                                    <p class="text-muted">Winner - <?= date('F j, Y', strtotime($competition['end_date'])) ?> (<?= floor((time() - strtotime($competition['end_date'])) / (60 * 60 * 24)) ?> days ago)</p>
+                                    <p class="text-warning">
+                                        <i class="bi bi-trophy me-1"></i> Won Featured Recipe among <?= htmlspecialchars($competition['entry_count']) ?> entries
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php 
+                    endif;
+                endwhile; 
+                
+                if (!$winner_shown): 
+                ?>
+                <div class="col-12 animate__animated animate__fadeIn">
+                    <div class="empty-state text-center p-5 bg-white rounded-3 shadow-sm">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-4 mb-3 d-inline-block">
+                            <i class="bi bi-trophy-fill fs-1 text-warning"></i>
+                        </div>
+                        <h4 class="mb-3">No Recent Winners Yet</h4>
+                        <p class="text-muted mb-4">Our current competitions are still running. Submit your entry for a chance to win!</p>
+                        <a href="#current-competitions" class="btn btn-warning rounded-pill px-4">
+                            <i class="bi bi-arrow-right me-1"></i> View Current Competitions
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
-        </div>
-    </div>
-
-    <!-- Winning Recipe Details Modal -->
-<div class="modal fade" id="winnerModal<?= $competition['competition_id'] ?>" tabindex="-1" aria-labelledby="winnerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger" id="winnerModalLabel"><?= htmlspecialchars($competition['title']) ?> Winner</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="winner-recipe bg-light p-4 rounded-3">
-                    <h6 class="text-primary mb-3">Winning Recipe</h6>
-                    <h5 class="mb-3"><?= htmlspecialchars($competition['winning_recipe_title']) ?></h5>
-                    
-                    <p class="mb-2">By <strong><?= htmlspecialchars($competition['winner_name']) ?></strong></p>
-                    <p class="text-muted">Winner - <?= date('F j, Y', strtotime($competition['end_date'])) ?> (<?= floor((time() - strtotime($competition['end_date'])) / (60 * 60 * 24)) ?> days ago)</p>
-                    <p class="text-warning">
-                        <i class="bi bi-trophy me-1"></i> Won Featured Recipe among <?= htmlspecialchars($competition['entry_count']) ?> entries
-                    </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <?php 
-        endif;
-    endwhile; 
-    
-    if (!$winner_shown): 
-    ?>
-    <div class="col-12 animate__animated animate__fadeIn">
-        <div class="empty-state text-center p-5 bg-white rounded-3 shadow-sm">
-            <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-4 mb-3 d-inline-block">
-                <i class="bi bi-trophy-fill fs-1 text-warning"></i>
-            </div>
-            <h4 class="mb-3">No Recent Winners Yet</h4>
-            <p class="text-muted mb-4">Our current competitions are still running. Submit your entry for a chance to win!</p>
-            <a href="#current-competitions" class="btn btn-warning rounded-pill px-4">
-                <i class="bi bi-arrow-right me-1"></i> View Current Competitions
-            </a>
-        </div>
-    </div>
-    <?php endif; ?>
-</div>
 
             <h3 id="current-competitions" class="section-title animate__animated animate__fadeIn"><i class="bi bi-fire me-2"></i>Current Competitions</h3>
 
@@ -879,10 +1085,8 @@ h1, h2, h3, h4, h5, h6 {
                             $place++;
                         endwhile;
                     ?>
-                   <a href="user-view-winner.php" class="btn btn-outline-primary w-100 mt-2">
-    View Winner
-</a>
-
+                    <a href="user-view-winner.php" class="btn btn-outline-primary w-100 mt-2">
+                        View Winner
                     </a>
                     <?php else: ?>
                     <div class="alert alert-warning mb-0">
@@ -926,17 +1130,6 @@ h1, h2, h3, h4, h5, h6 {
     });
     <?php endif; ?>
 
-    // Floating Action Button smooth scroll
-    document.querySelector('.fab').addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            window.scrollTo({
-                top: target.offsetTop - 20, // Adjust to scroll slightly above the target
-                behavior: 'smooth'
-            });
-        }
-    });
     // Animate elements when they come into view
     document.addEventListener('DOMContentLoaded', function() {
         const animateElements = document.querySelectorAll('.animate__animated');

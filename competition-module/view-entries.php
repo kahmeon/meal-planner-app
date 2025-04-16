@@ -625,7 +625,7 @@ $result = $stmt->get_result();
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="view.php?id=<?= $row['recipe_id'] ?>" class="recipe-name text-decoration-none">
+                                    <a href="../recipe-modules/view-recipe.php?id=<?= $row['recipe_id'] ?>" class="recipe-name text-decoration-none">
                                         <?= htmlspecialchars($row['recipe_name']) ?>
                                     </a>
                                 </td>
@@ -650,7 +650,7 @@ $result = $stmt->get_result();
                                 </td>
                                 <td>
                                     <div class="action-btns">
-                                        <a href="view.php?id=<?= $row['recipe_id'] ?>" 
+                                        <a href="../recipe-modules/view-recipe.php?id=<?= $row['recipe_id'] ?>" 
                                            class="btn action-btn view-btn"
                                            data-bs-toggle="tooltip" data-bs-placement="top" title="View Recipe">
                                             <i class="bi bi-eye"></i>
