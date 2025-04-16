@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 07, 2025 at 04:15 PM
+-- Generation Time: Apr 16, 2025 at 04:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -198,9 +198,8 @@ INSERT INTO `recipes` (`id`, `title`, `description`, `ingredients`, `steps`, `cu
 (11, 'Spaghetti Carbonara', 'Classic creamy pasta with egg, parmesan, and beef bacon.', '[\"200g spaghetti\", \"2 egg yolks\", \"1 whole egg\", \"50g parmesan\", \"100g beef bacon\", \"Salt and black pepper\"]', '[\"Cook pasta al dente.\", \"Fry bacon, set aside.\", \"Whisk eggs with cheese.\", \"Toss hot pasta with egg mix and bacon.\", \"Serve with black pepper.\"]', 'Italian', 10, 15, 25, 'medium', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
 (12, 'Ayam Masak Merah', 'Malaysian red tomato chicken stew with aromatic spices.', '[\"500g chicken pieces\", \"1 onion, blended\", \"2 cloves garlic\", \"3 tbsp tomato puree\", \"1 cinnamon stick\", \"1/2 cup coconut milk\", \"Salt and sugar to taste\"]', '[\"Fry chicken until golden, set aside.\", \"Sauté onion, garlic, and tomato puree.\", \"Add cinnamon, return chicken.\", \"Pour in coconut milk and simmer.\"]', 'Malaysian', 15, 30, 45, 'medium', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
 (13, 'Vegetable Stir Fry', 'Colorful vegetables tossed in soy-sesame sauce for a healthy dish.', '[\"1 cup broccoli florets\", \"1 carrot, sliced\", \"1/2 bell pepper\", \"1/2 cup snow peas\", \"1 tbsp soy sauce\", \"1 tsp sesame oil\", \"2 cloves garlic\"]', '[\"Heat oil and sauté garlic.\", \"Add vegetables and stir-fry 5 mins.\", \"Add soy sauce and sesame oil.\", \"Toss well and serve.\"]', 'Chinese', 10, 10, 20, 'easy', '', 'approved', 1, 0, 1, '2025-04-07 02:41:50', '2025-04-07 02:41:50', NULL),
-(14, 'ss', 'ss', '[\"1\"]', '[\"1\"]', 'ss', 1, 1, 1, 'easy', '1', 'pending', 1, 0, 1, '2025-04-07 03:07:00', '2025-04-07 03:07:00', NULL),
-(15, 'ww', 'ww', '[\"www\"]', '[\"www\"]', 'ww', 22, 22, 22, 'easy', 'www', 'pending', 1, 0, 1, '2025-04-07 03:20:33', '2025-04-07 03:20:33', NULL),
-(16, 'wdw', 'dwqd', '[\"efewf\"]', '[\"effw\"]', 'qwddqw', 33, 33, 33, 'easy', 'efwwe', 'pending', 1, 0, 1, '2025-04-07 03:27:06', '2025-04-07 03:27:06', NULL),
+(14, 'tt', 'ss', '[\"1\"]', '[\"1\"]', 'ss', 1, 1, 1, 'easy', '1', 'approved', 1, 0, 1, '2025-04-07 03:07:00', '2025-04-16 03:28:19', NULL),
+(15, 'uu', 'wwwww', '[\"www\"]', '[\"www\"]', 'ww', 22, 22, 22, 'easy', 'www', 'rejected', 1, 0, 1, '2025-04-07 03:20:33', '2025-04-16 03:47:27', 'the recipes is unclear'),
 (17, 'dwqe', 'efwef', '[\"edqw\"]', '[\"ewfef\"]', 'f32f', 33, 33, 33, '', 'ewfewf', 'pending', 1, 0, 2, '2025-04-07 05:06:09', '2025-04-07 05:06:09', NULL),
 (18, 'qwfdwqf', 'ewfef', '[\"dcvsda\"]', '[\"wefaef\"]', 'ewfewf', 22, 22, 22, 'medium', 'ewfwf', 'pending', 1, 0, 2, '2025-04-07 05:12:17', '2025-04-07 05:12:17', NULL),
 (19, 'egver', 'gregwe', '[\"egfwes\"]', '[\"ewfw\"]', 'eswe', 77, 77, 77, 'medium', 'ewffw', 'pending', 1, 0, 2, '2025-04-07 05:30:55', '2025-04-07 05:30:55', NULL),
@@ -225,7 +224,6 @@ CREATE TABLE `recipe_images` (
 --
 
 INSERT INTO `recipe_images` (`id`, `recipe_id`, `image_url`) VALUES
-(20, 16, 'uploads/recipes/1743996501_nasi-lemak.webp'),
 (21, 14, 'uploads/recipes/1743996731_nasi-lemak.webp'),
 (22, 4, 'uploads/recipes/1743996773_nasi-lemak.webp'),
 (23, 17, '/uploads/recipes/1744002369_nasi-lemak.webp'),
@@ -248,7 +246,8 @@ INSERT INTO `recipe_images` (`id`, `recipe_id`, `image_url`) VALUES
 (40, 21, '/uploads/recipes/1744006517_nasi-lemak.webp'),
 (41, 22, '/uploads/recipes/1744016854_burger-special2.jpg'),
 (42, 22, '/uploads/recipes/1744016854_burger-special1.jpg'),
-(43, 22, '/uploads/recipes/1744016854_burger-special.jpg');
+(43, 22, '/uploads/recipes/1744016854_burger-special.jpg'),
+(44, 15, '/uploads/recipes/1744741106_burger-special2.jpg');
 
 -- --------------------------------------------------------
 
@@ -274,7 +273,6 @@ INSERT INTO `recipe_tags` (`recipe_id`, `tag_id`) VALUES
 (4, 3),
 (6, 3),
 (15, 3),
-(16, 3),
 (17, 3),
 (18, 5),
 (19, 1),
@@ -294,6 +292,28 @@ CREATE TABLE `recipe_views` (
   `recipe_id` int(11) DEFAULT NULL,
   `viewed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `saved_recipes`
+--
+
+CREATE TABLE `saved_recipes` (
+  `user_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `saved_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `saved_recipes`
+--
+
+INSERT INTO `saved_recipes` (`user_id`, `recipe_id`, `saved_at`) VALUES
+(1, 2, '2025-04-15 18:11:11'),
+(1, 4, '2025-04-15 18:09:25'),
+(2, 2, '2025-04-15 16:30:54'),
+(3, 2, '2025-04-16 14:26:53');
 
 -- --------------------------------------------------------
 
@@ -440,6 +460,13 @@ ALTER TABLE `recipe_views`
   ADD KEY `recipe_id` (`recipe_id`);
 
 --
+-- Indexes for table `saved_recipes`
+--
+ALTER TABLE `saved_recipes`
+  ADD PRIMARY KEY (`user_id`,`recipe_id`),
+  ADD KEY `fk_recipe` (`recipe_id`);
+
+--
 -- Indexes for table `structured_ingredients`
 --
 ALTER TABLE `structured_ingredients`
@@ -511,13 +538,13 @@ ALTER TABLE `ratings`
 -- AUTO_INCREMENT for table `recipes`
 --
 ALTER TABLE `recipes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `recipe_images`
 --
 ALTER TABLE `recipe_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `recipe_views`
@@ -601,6 +628,15 @@ ALTER TABLE `recipe_tags`
 ALTER TABLE `recipe_views`
   ADD CONSTRAINT `recipe_views_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `recipe_views_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `saved_recipes`
+--
+ALTER TABLE `saved_recipes`
+  ADD CONSTRAINT `fk_recipe` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `saved_recipes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `saved_recipes_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `structured_ingredients`
