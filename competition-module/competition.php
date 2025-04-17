@@ -2,37 +2,76 @@
 include '../includes/db.php';
 session_start();
 
-$current_date = date('Y-m-d H:i:s');
+// Function to properly format image URLs with fallback
+function getImageUrl($url, $type = 'competition') {
+    $defaultImages = [
+        'competition' => '../assets/images/default-competition.jpg',
+        'recipe' => '../assets/images/default-recipe.jpg',
+        'avatar' => '../assets/images/default-avatar.jpg'
+    ];
+    
+    // If no image provided, return default
+    if (empty($url)) {
+        return $defaultImages[$type];
+    }
+    
+    // If it's already a full URL
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+        return $url;
+    }
+    
+    // Handle relative paths
+    if (strpos($url, '../') === 0) {
+        $full_path = $url;
+    } else {
+        $full_path = '../' . ltrim($url, '/');
+    }
+    
+    // Check if file exists
+    if (file_exists($full_path)) {
+        return $full_path;
+    }
+    
+    return $defaultImages[$type];
+}
 
-// Check if user is logged in
+$current_date = date('Y-m-d H:i:s');
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-// 1. MAIN COMPETITIONS QUERY (FIXED)
+// 1. MAIN COMPETITIONS QUERY
 $sql = "
     SELECT 
         c.*,
         COUNT(e.entry_id) AS entry_count,
-        u.name AS winner_name,  -- Changed from c.winner_name to get from users table
-        u.avatar_url AS winner_avatar, -- Added
+        u.name AS winner_name,
+        u.avatar_url AS winner_avatar,
         r.title AS winning_recipe_title,
         r.image_url AS winning_recipe_image,
         r.id AS winning_recipe_id,
         MAX(CASE WHEN e.status = 'winner' THEN 1 ELSE 0 END) AS has_winner
     FROM competitions c
     LEFT JOIN competition_entries e ON c.competition_id = e.competition_id
-    LEFT JOIN users u ON c.winner_id = u.id  -- Added join to users
+    LEFT JOIN users u ON c.winner_id = u.id
     LEFT JOIN recipes r ON c.winning_recipe_id = r.id
     WHERE (c.status = 'active' AND c.end_date > NOW()) 
        OR c.status = 'completed'
     GROUP BY c.competition_id
     ORDER BY 
         CASE WHEN c.status = 'active' THEN 0 ELSE 1 END,
-        c.end_date DESC  -- Changed to end_date for more logical ordering
+        c.end_date DESC
 ";
 
 $result = $conn->query($sql);
+$competitions = [];
+while ($row = $result->fetch_assoc()) {
+    // Format all image URLs
+    $row['image_url'] = getImageUrl($row['image_url'], 'competition');
+    $row['winning_recipe_image'] = getImageUrl($row['winning_recipe_image'], 'recipe');
+    $row['winner_avatar'] = getImageUrl($row['winner_avatar'], 'avatar');
+    $competitions[] = $row;
+}
 
-// 2. FEATURED WINNER QUERY (OPTIMIZED)
+// 2. FEATURED WINNER QUERY
 $featured_winner_sql = "
     SELECT 
         c.competition_id, 
@@ -49,7 +88,7 @@ $featured_winner_sql = "
     JOIN recipes r ON c.winning_recipe_id = r.id
     WHERE c.status = 'completed' 
       AND c.winner_id IS NOT NULL
-      AND c.winner_announced = 1  -- Ensure winner was officially announced
+      AND c.winner_announced = 1
     ORDER BY c.winner_announced_at DESC 
     LIMIT 1
 ";
@@ -57,8 +96,12 @@ $featured_winner_sql = "
 $featured_winner_result = $conn->query($featured_winner_sql);
 $featured_winner = $featured_winner_result->num_rows > 0 ? $featured_winner_result->fetch_assoc() : null;
 
-// 3. USER'S JOINED COMPETITIONS (NEW)
-// 3. USER'S JOINED COMPETITIONS (UPDATED)
+if ($featured_winner) {
+    $featured_winner['winning_recipe_image'] = getImageUrl($featured_winner['winning_recipe_image'], 'recipe');
+    $featured_winner['winner_avatar'] = getImageUrl($featured_winner['winner_avatar'], 'avatar');
+}
+
+// 3. USER'S JOINED COMPETITIONS
 $user_competitions = [];
 if ($user_id) {
     $user_competitions_sql = "
@@ -87,6 +130,8 @@ if ($user_id) {
     $user_result = $stmt->get_result();
     
     while ($row = $user_result->fetch_assoc()) {
+        $row['image_url'] = getImageUrl($row['image_url'], 'competition');
+        $row['recipe_image'] = getImageUrl($row['recipe_image'], 'recipe');
         $user_competitions[] = $row;
     }
     $stmt->close();
@@ -107,608 +152,632 @@ if ($user_id) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
     <style>
-       :root {
-    --primary-color: #E63946;
-    --primary-light: rgba(230, 57, 70, 0.1);
-    --secondary-color: #457B9D;
-    --secondary-light: rgba(69, 123, 157, 0.1);
-    --accent-color: #FF7E33;
-    --light-bg: #F8F9FA;
-    --dark-color: #1D3557;
-    --dark-light: #4A5568;
-    --success-color: #38A169;
-    --warning-color: #DD6B20;
-    --danger-color: #E53E3E;
-    --info-color: #3182CE;
-    --gold-color: #D4AF37;
-    --gold-light: rgba(212, 175, 55, 0.1);
-    --silver-color: #C0C0C0;
-    --bronze-color: #CD7F32;
-    --text-color: #2D3748;
-    --text-light: #718096;
-    --border-radius: 12px;
-    --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-body {
-    font-family: 'Nunito', sans-serif;
-    background-color: var(--light-bg);
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    color: var(--dark-color);
-}
-
-/* Page Header */
-.page-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
-    border-radius: var(--border-radius);
-    padding: 3rem 1.5rem;
-    margin-bottom: 3rem;
-    text-align: center;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    background-size: 200% 200%;
-    animation: gradientBG 15s ease infinite;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.page-header-content {
-    position: relative;
-    z-index: 2;
-}
-
-.page-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.page-header p {
-    font-size: 1.25rem;
-    max-width: 700px;
-    margin: 0 auto 2rem;
-    opacity: 0.9;
-}
-
-.header-badge {
-    background-color: rgba(255,255,255,0.15);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 0.5rem 1.25rem;
-    border-radius: 50px;
-    font-weight: 600;
-    margin: 0 0.5rem 0.5rem;
-    display: inline-block;
-    transition: var(--transition);
-}
-
-.header-badge:hover {
-    transform: translateY(-2px);
-    background-color: rgba(255,255,255,0.25);
-}
-
-/* Section Titles */
-.section-title {
-    position: relative;
-    padding-bottom: 1rem;
-    margin: 2.5rem 0 1.5rem;
-    color: var(--dark-color);
-}
-
-.section-title:after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 60px;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    border-radius: 2px;
-}
-
-/* Cards */
-.competition-card {
-    border: none;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-    margin-bottom: 2rem;
-    position: relative;
-    background: white;
-    font-size: 0.9375rem;
-}
-
-.competition-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
-}
-
-.competition-card.active {
-    border-left: 5px solid var(--primary-color);
-}
-
-.competition-card.completed {
-    border-left: 5px solid var(--success-color);
-}
-
-.featured-competition {
-    border: 2px solid var(--gold-color);
-    position: relative;
-    overflow: hidden;
-}
-
-.featured-competition:before {
-    content: 'FEATURED';
-    position: absolute;
-    top: 15px;
-    right: -30px;
-    width: 120px;
-    padding: 3px 0;
-    background-color: var(--gold-color);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-align: center;
-    transform: rotate(45deg);
-    z-index: 1;
-}
-
-.card-img-container {
-    width: 100%;
-    height: 220px;
-    overflow: hidden;
-    position: relative;
-}
-
-.card-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-}
-
-.competition-card:hover .card-img-container img {
-    transform: scale(1.05);
-}
-
-.card-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    padding: 1.5rem;
-    color: white;
-    z-index: 2;
-}
-
-.card-overlay h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.badge {
-    font-weight: 600;
-    padding: 0.5rem 0.75rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    border-radius: 50px;
-    background-color: rgba(255,255,255,0.2);
-    backdrop-filter: blur(5px);
-    font-size: 0.8rem;
-}
-
-.card-body {
-    padding: 1.75rem;
-}
-
-.time-progress {
-    height: 6px;
-    background-color: var(--light-bg);
-    border-radius: 3px;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-}
-
-.time-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    border-radius: 3px;
-    transition: width 1s ease;
-}
-
-.competition-dates {
-    background-color: var(--light-bg);
-    padding: 0.75rem;
-    border-radius: var(--border-radius);
-    font-size: 0.85rem;
-    color: var(--text-light);
-    display: flex;
-    justify-content: space-between;
-    border: 1px solid rgba(0,0,0,0.05);
-    margin-bottom: 1.25rem;
-}
-
-.competition-description {
-    color: var(--text-light);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    font-size: 0.9375rem;
-}
-
-.card-actions {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.btn-join, .btn-vote, .btn-details {
-    padding: 0.75rem 1.25rem;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-}
-
-.btn-join {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-}
-
-.btn-join:hover {
-    background-color: #C1121F;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
-}
-
-.btn-vote {
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-}
-
-.btn-vote:hover {
-    background-color: #315E7D;
-    transform: translateY(-2px);
-}
-
-.btn-details {
-    background-color: white;
-    color: var(--dark-color);
-    border: 1px solid rgba(0,0,0,0.1);
-}
-
-.btn-details:hover {
-    background-color: var(--light-bg);
-    transform: translateY(-2px);
-}
-
-/* Winner Cards */
-.winner-card {
-    border: none;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-    height: 100%;
-    background: white;
-}
-
-.winner-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
-}
-
-.winner-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    margin-bottom: 1.5rem;
-}
-
-.winner-recipe-card {
-    border: none;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    transition: var(--transition);
-    margin-top: 1.5rem;
-}
-
-.winner-recipe-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.winner-recipe-img {
-    height: 150px;
-    object-fit: cover;
-    width: 100%;
-}
-
-/* Sidebar */
-.sidebar-card {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-}
-
-.sidebar-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.sidebar-card h5 {
-    font-size: 1.25rem;
-    margin-bottom: 1.25rem;
-    color: var(--dark-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.sidebar-card ul {
-    padding-left: 1.25rem;
-    margin-bottom: 0;
-}
-
-.sidebar-card li {
-    margin-bottom: 0.75rem;
-    position: relative;
-    list-style-type: none;
-    padding-left: 1.5rem;
-}
-
-.sidebar-card li:before {
-    content: '•';
-    color: var(--primary-color);
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-}
-
-/* Floating Action Button */
-.fab {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
-    z-index: 100;
-    transition: var(--transition);
-    border: none;
-    cursor: pointer;
-}
-
-.fab:hover {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 15px 30px rgba(230, 57, 70, 0.4);
-}
-
-/* Empty States */
-.empty-state {
-    text-align: center;
-    padding: 3rem 2rem;
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
-.empty-state i {
-    font-size: 3rem;
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    display: inline-block;
-}
-
-.empty-state h4 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.empty-state p {
-    color: var(--text-light);
-    margin-bottom: 1.5rem;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* User Competitions Section */
-.user-competitions {
-    background-color: white;
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    margin-bottom: 3rem;
-    box-shadow: var(--box-shadow);
-}
-
-.user-competition-card {
-    display: flex;
-    align-items: center;
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    background-color: var(--light-bg);
-    margin-bottom: 1rem;
-    transition: var(--transition);
-    border-left: 4px solid var(--primary-color);
-}
-
-.user-competition-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.user-competition-card.completed {
-    border-left-color: var(--success-color);
-}
-
-.user-competition-card.winner {
-    border-left-color: var(--gold-color);
-    background-color: var(--gold-light);
-}
-
-.user-competition-image {
-    width: 80px;
-    height: 80px;
-    border-radius: var(--border-radius);
-    object-fit: cover;
-    margin-right: 1.5rem;
-    flex-shrink: 0;
-}
-
-.user-competition-info {
-    flex-grow: 1;
-}
-
-.user-competition-status {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.status-pending {
-    background-color: var(--warning-color);
-    color: white;
-}
-
-.status-approved {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.status-winner {
-    background-color: var(--gold-color);
-    color: white;
-}
-
-.status-finalist {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.user-competition-actions {
-    margin-left: 1.5rem;
-    flex-shrink: 0;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 992px) {
-    .page-header h1 {
-        font-size: 2rem;
-    }
-    
-    .page-header p {
-        font-size: 1.1rem;
-    }
-    
-    .card-img-container {
-        height: 180px;
-    }
-    
-    .user-competition-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .user-competition-image {
-        margin-right: 0;
-        margin-bottom: 1rem;
-        width: 100%;
-        height: 120px;
-    }
-    
-    .user-competition-actions {
-        margin-left: 0;
-        margin-top: 1rem;
-        width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-    .page-header {
-        padding: 2rem 1rem;
-    }
-    
-    .page-header h1 {
-        font-size: 1.75rem;
-    }
-    
-    .header-badge {
-        padding: 0.4rem 1rem;
-        font-size: 0.8rem;
-    }
-    
-    .card-actions {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .btn-join, .btn-vote, .btn-details {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-@media (max-width: 576px) {
-    .page-header {
-        border-radius: 0;
-        margin-left: -15px;
-        margin-right: -15px;
-    }
-    
-    .competition-dates {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .fab {
-        width: 50px;
-        height: 50px;
-        font-size: 1.25rem;
-        bottom: 20px;
-        right: 20px;
-    }
-    
-    .user-competitions {
-        padding: 1.5rem;
-    }
-}
+        :root {
+            --primary-color: #E63946;
+            --primary-light: rgba(230, 57, 70, 0.1);
+            --secondary-color: #457B9D;
+            --secondary-light: rgba(69, 123, 157, 0.1);
+            --accent-color: #FF7E33;
+            --light-bg: #F8F9FA;
+            --dark-color: #1D3557;
+            --dark-light: #4A5568;
+            --success-color: #38A169;
+            --warning-color: #DD6B20;
+            --danger-color: #E53E3E;
+            --info-color: #3182CE;
+            --gold-color: #D4AF37;
+            --gold-light: rgba(212, 175, 55, 0.1);
+            --silver-color: #C0C0C0;
+            --bronze-color: #CD7F32;
+            --text-color: #2D3748;
+            --text-light: #718096;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            border-radius: var(--border-radius);
+            padding: 3rem 1.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .page-header p {
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .header-badge {
+            background-color: rgba(255,255,255,0.15);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 0 0.5rem 0.5rem;
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .header-badge:hover {
+            transform: translateY(-2px);
+            background-color: rgba(255,255,255,0.25);
+        }
+
+        /* Section Titles */
+        .section-title {
+            position: relative;
+            padding-bottom: 1rem;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        /* Cards */
+        .competition-card {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            position: relative;
+            background: white;
+            font-size: 0.9375rem;
+        }
+
+        .competition-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        .competition-card.active {
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .competition-card.completed {
+            border-left: 5px solid var(--success-color);
+        }
+
+        .featured-competition {
+            border: 2px solid var(--gold-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-competition:before {
+            content: 'FEATURED';
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            width: 120px;
+            padding: 3px 0;
+            background-color: var(--gold-color);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            transform: rotate(45deg);
+            z-index: 1;
+        }
+
+        /* Image Containers */
+        .card-img-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card-img-container .default-img {
+            width: auto;
+            height: auto;
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            opacity: 0.7;
+        }
+
+        .competition-card:hover .card-img-container img {
+            transform: scale(1.05);
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1.5rem;
+            color: white;
+            z-index: 2;
+        }
+
+        .card-overlay h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .badge {
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 50px;
+            background-color: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            font-size: 0.8rem;
+        }
+
+        .card-body {
+            padding: 1.75rem;
+        }
+
+        .time-progress {
+            height: 6px;
+            background-color: var(--light-bg);
+            border-radius: 3px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .time-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .competition-dates {
+            background-color: var(--light-bg);
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 1.25rem;
+        }
+
+        .competition-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-join, .btn-vote, .btn-details {
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-join {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-join:hover {
+            background-color: #C1121F;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-vote {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-vote:hover {
+            background-color: #315E7D;
+            transform: translateY(-2px);
+        }
+
+        .btn-details {
+            background-color: white;
+            color: var(--dark-color);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .btn-details:hover {
+            background-color: var(--light-bg);
+            transform: translateY(-2px);
+        }
+
+        /* Winner Cards */
+        .winner-card {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            height: 100%;
+            background: white;
+        }
+
+        .winner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        .winner-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .winner-recipe-card {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            margin-top: 1.5rem;
+        }
+
+        .winner-recipe-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .winner-recipe-img {
+            height: 150px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .sidebar-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-card h5 {
+            font-size: 1.25rem;
+            margin-bottom: 1.25rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-card ul {
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        .sidebar-card li {
+            margin-bottom: 0.75rem;
+            position: relative;
+            list-style-type: none;
+            padding-left: 1.5rem;
+        }
+
+        .sidebar-card li:before {
+            content: '•';
+            color: var(--primary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
+            z-index: 100;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .fab:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.4);
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .empty-state h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* User Competitions Section */
+        .user-competitions {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .user-competition-card {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: var(--light-bg);
+            margin-bottom: 1rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .user-competition-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-competition-card.completed {
+            border-left-color: var(--success-color);
+        }
+
+        .user-competition-card.winner {
+            border-left-color: var(--gold-color);
+            background-color: var(--gold-light);
+        }
+
+        .user-competition-image {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-competition-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .user-competition-info {
+            flex-grow: 1;
+        }
+
+        .user-competition-status {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .status-approved {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-winner {
+            background-color: var(--gold-color);
+            color: white;
+        }
+
+        .status-finalist {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .user-competition-actions {
+            margin-left: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .page-header p {
+                font-size: 1.1rem;
+            }
+            
+            .card-img-container {
+                height: 180px;
+            }
+            
+            .user-competition-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-competition-image {
+                margin-right: 0;
+                margin-bottom: 1rem;
+                width: 100%;
+                height: 120px;
+            }
+            
+            .user-competition-actions {
+                margin-left: 0;
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 2rem 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .header-badge {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .btn-join, .btn-vote, .btn-details {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header {
+                border-radius: 0;
+                margin-left: -15px;
+                margin-right: -15px;
+            }
+            
+            .competition-dates {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .fab {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .user-competitions {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -729,7 +798,7 @@ h1, h2, h3, h4, h5, h6 {
                 </div>
             </div>
 
-            <!-- User's Competitions Section (NEW) -->
+            <!-- User's Competitions Section -->
             <?php if ($user_id && !empty($user_competitions)): ?>
             <div class="user-competitions animate__animated animate__fadeIn">
                 <h3 class="section-title"><i class="bi bi-person-check me-2"></i>Your Competition Entries</h3>
@@ -740,9 +809,12 @@ h1, h2, h3, h4, h5, h6 {
                     $days_remaining = $is_completed ? 0 : ceil((strtotime($entry['end_date']) - time()) / (60 * 60 * 24));
                 ?>
                 <div class="user-competition-card <?= $is_winner ? 'winner' : '' ?> <?= $is_completed ? 'completed' : '' ?>">
-                    <img src="<?= htmlspecialchars($entry['image_url'] ?? '../assets/images/default-competition.jpg') ?>" 
-                         class="user-competition-image" 
-                         alt="<?= htmlspecialchars($entry['title']) ?>">
+                    <div class="user-competition-image">
+                        <img src="<?= htmlspecialchars($entry['image_url']) ?>" 
+                             class="<?= strpos($entry['image_url'], 'default-') !== false ? 'default-img' : '' ?>" 
+                             alt="<?= htmlspecialchars($entry['title']) ?>"
+                             onerror="this.onerror=null; this.src='<?= getImageUrl('', 'competition') ?>'; this.className='default-img'">
+                    </div>
                     
                     <div class="user-competition-info">
                         <span class="user-competition-status 
@@ -784,9 +856,6 @@ h1, h2, h3, h4, h5, h6 {
                            class="btn btn-sm btn-outline-primary mb-1 w-100">
                            <i class="bi bi-eye"></i> View
                         </a>
-                        <?php if (!$is_completed): ?>
-                        
-                        <?php endif; ?>
                         <?php if ($is_winner): ?>
                         <span class="badge bg-warning text-dark w-100">
                             <i class="bi bi-trophy"></i> Winner!
@@ -807,17 +876,15 @@ h1, h2, h3, h4, h5, h6 {
             </div>
             <?php endif; ?>
             
-            <!-- Improved Recent Winners Section -->
+            <!-- Recent Winners Section -->
             <h3 class="section-title animate__animated animate__fadeIn">
                 <i class="bi bi-trophy-fill me-2" style="color: var(--gold-color);"></i>Recent Winners
             </h3>
 
             <div class="row g-4 mb-5">
                 <?php 
-                // Reset pointer and find completed competitions with winners
-                $result->data_seek(0);
                 $winner_shown = false;
-                while ($competition = $result->fetch_assoc()): 
+                foreach ($competitions as $competition): 
                     if ($competition['status'] == 'completed' && !empty($competition['winner_name'])): 
                         $winner_shown = true;
                         $days_since_ended = floor((time() - strtotime($competition['end_date'])) / (60 * 60 * 24));
@@ -835,9 +902,10 @@ h1, h2, h3, h4, h5, h6 {
                         
                         <!-- Recipe Image with Hover Effect -->
                         <div class="card-img-container position-relative overflow-hidden rounded-top" style="height: 200px;">
-                            <img src="<?= htmlspecialchars($competition['winning_recipe_image'] ?? '../assets/images/default-recipe.jpg') ?>" 
-                                class="card-img-top h-100 w-100 object-fit-cover transition-transform" 
-                                alt="Winning Recipe">
+                            <img src="<?= htmlspecialchars($competition['winning_recipe_image']) ?>" 
+                                class="<?= strpos($competition['winning_recipe_image'], 'default-') !== false ? 'default-img' : '' ?>" 
+                                alt="Winning Recipe"
+                                onerror="this.onerror=null; this.src='<?= getImageUrl('', 'recipe') ?>'; this.className='default-img'">
                             
                             <!-- Competition Title Overlay -->
                             <div class="position-absolute bottom-0 start-0 end-0 p-3 text-white" 
@@ -859,10 +927,11 @@ h1, h2, h3, h4, h5, h6 {
                             
                             <!-- Winner Profile -->
                             <div class="d-flex align-items-center mb-3 p-3 bg-light rounded-3">
-                                <img src="<?= htmlspecialchars($competition['winner_avatar'] ?? '../assets/default-avatar.jpg') ?>" 
+                                <img src="<?= htmlspecialchars($competition['winner_avatar']) ?>" 
                                     class="rounded-circle me-3 border border-3 border-warning" 
                                     width="60" height="60" alt="Winner"
-                                    style="object-fit: cover;">
+                                    style="object-fit: cover;"
+                                    onerror="this.onerror=null; this.src='<?= getImageUrl('', 'avatar') ?>'">
                                 <div>
                                     <h5 class="mb-1"><?= htmlspecialchars($competition['winner_name']) ?></h5>
                                     <small class="text-muted d-flex align-items-center">
@@ -924,12 +993,9 @@ h1, h2, h3, h4, h5, h6 {
                     </div>
                 </div>
 
-                <?php 
-                    endif;
-                endwhile; 
+                <?php endif; endforeach; ?>
                 
-                if (!$winner_shown): 
-                ?>
+                <?php if (!$winner_shown): ?>
                 <div class="col-12 animate__animated animate__fadeIn">
                     <div class="empty-state text-center p-5 bg-white rounded-3 shadow-sm">
                         <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle p-4 mb-3 d-inline-block">
@@ -948,13 +1014,9 @@ h1, h2, h3, h4, h5, h6 {
             <h3 id="current-competitions" class="section-title animate__animated animate__fadeIn"><i class="bi bi-fire me-2"></i>Current Competitions</h3>
 
             <?php 
-            // Reset pointer for active competitions
-            $result->data_seek(0);
             $active_competitions = false;
-            
-            while ($competition = $result->fetch_assoc()): 
+            foreach ($competitions as $competition): 
                 $is_active = ($competition['status'] == 'active' && strtotime($competition['end_date']) > time());
-                
                 if ($is_active):
                     $active_competitions = true;
                     $days_remaining = ceil((strtotime($competition['end_date']) - time()) / (60 * 60 * 24));
@@ -972,8 +1034,10 @@ h1, h2, h3, h4, h5, h6 {
                     <?php endif; ?>
                     
                     <div class="card-img-container">
-                        <img src="<?= htmlspecialchars($competition['image_url'] ?? '../assets/images/default-competition.jpg') ?>" 
-                            class="card-img-top" alt="<?= htmlspecialchars($competition['title']) ?>">
+                        <img src="<?= htmlspecialchars($competition['image_url']) ?>" 
+                            class="<?= strpos($competition['image_url'], 'default-') !== false ? 'default-img' : '' ?>" 
+                            alt="<?= htmlspecialchars($competition['title']) ?>"
+                            onerror="this.onerror=null; this.src='<?= getImageUrl('', 'competition') ?>'; this.className='default-img'">
                         <div class="card-overlay">
                             <h3><?= htmlspecialchars($competition['title']) ?></h3>
                             <span class="badge"><i class="bi bi-people-fill me-1"></i><?= $competition['entry_count'] ?> entries</span>
@@ -1006,12 +1070,9 @@ h1, h2, h3, h4, h5, h6 {
                         </div>
                     </div>
                 </div>
-            <?php 
-                endif;
-            endwhile; 
+            <?php endif; endforeach; ?>
             
-            if (!$active_competitions): 
-            ?>
+            <?php if (!$active_competitions): ?>
                 <div class="empty-state animate__animated animate__fadeIn">
                     <i class="bi bi-emoji-frown"></i>
                     <h4 class="mb-3">No Active Competitions</h4>
@@ -1069,8 +1130,9 @@ h1, h2, h3, h4, h5, h6 {
                     ?>
                     <div class="d-flex align-items-center mb-3">
                         <div class="position-relative me-3">
-                            <img src="<?= htmlspecialchars($winner['avatar_url'] ?? '../assets/default-avatar.jpg') ?>" 
-                                class="rounded-circle" width="50" height="50" alt="Top Winner">
+                            <img src="<?= htmlspecialchars(getImageUrl($winner['avatar_url'], 'avatar')) ?>" 
+                                class="rounded-circle" width="50" height="50" alt="Top Winner"
+                                onerror="this.onerror=null; this.src='<?= getImageUrl('', 'avatar') ?>'">
                             <span class="position-absolute bottom-0 end-0 badge rounded-circle d-flex align-items-center justify-content-center" 
                                 style="width: 24px; height: 24px; background-color: <?= $badge_color ?>; color: white;">
                                 <?= $place ?>
@@ -1111,9 +1173,36 @@ h1, h2, h3, h4, h5, h6 {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Add confetti effect when winner is announced
-    <?php if (isset($_GET['winner_announced'])): ?>
+    // Enhanced image error handling
     document.addEventListener('DOMContentLoaded', function() {
+        // Set up error handlers for all images
+        document.querySelectorAll('img').forEach(img => {
+            // Skip if already has error handler
+            if (img.hasAttribute('data-has-error-handler')) return;
+            
+            img.setAttribute('data-has-error-handler', 'true');
+            
+            img.addEventListener('error', function() {
+                const src = this.src.toLowerCase();
+                let fallback = '';
+                
+                if (src.includes('competition')) {
+                    fallback = '../assets/images/default-competition.jpg';
+                } else if (src.includes('recipe')) {
+                    fallback = '../assets/images/default-recipe.jpg';
+                } else if (src.includes('avatar')) {
+                    fallback = '../assets/images/default-avatar.jpg';
+                } else {
+                    fallback = '../assets/images/default-image.jpg';
+                }
+                
+                this.src = fallback;
+                this.classList.add('default-img');
+            });
+        });
+
+        // Add confetti effect when winner is announced
+        <?php if (isset($_GET['winner_announced'])): ?>
         Swal.fire({
             title: 'Congratulations!',
             text: 'A new competition winner has been announced!',
@@ -1127,11 +1216,9 @@ h1, h2, h3, h4, h5, h6 {
                 no-repeat
             `
         });
-    });
-    <?php endif; ?>
+        <?php endif; ?>
 
-    // Animate elements when they come into view
-    document.addEventListener('DOMContentLoaded', function() {
+        // Animate elements when they come into view
         const animateElements = document.querySelectorAll('.animate__animated');
         
         const observer = new IntersectionObserver((entries) => {
