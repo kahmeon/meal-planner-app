@@ -1,98 +1,47 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+session_start();
 
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
-// Admin authentication check
-if (!isAdmin()) {
-    header("Location: ../login.php");
+// Ensure the user is an admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: login.php"); // or redirect them to an error page
     exit;
 }
 
-$competition_id = intval($_GET['id'] ?? 0);
+// Get POST data from the form
+$competition_id = isset($_POST['competition_id']) ? intval($_POST['competition_id']) : 0;
+$winner_id = isset($_POST['winner_id']) ? intval($_POST['winner_id']) : 0;
+$recipe_id = isset($_POST['recipe_id']) ? intval($_POST['recipe_id']) : 0;
 
-// Fetch competition and winner data
-$competition_data = $conn->query("
-    SELECT 
-        c.title,
-        c.winner_id,
-        c.prize,
-        u.name AS winner_name,
-        u.email AS winner_email
-    FROM competitions c
-    LEFT JOIN users u ON c.winner_id = u.id
-    WHERE c.competition_id = $competition_id
-")->fetch_assoc();
-
-if (!$competition_data) {
-    die("Competition not found");
+// Validate the data
+if ($competition_id <= 0 || $winner_id <= 0 || $recipe_id <= 0) {
+    die("Invalid competition, winner, or recipe ID.");
 }
 
-// Check if already has a winner
-if (empty($competition_data['winner_id'])) {
-    die("This competition has no winner selected yet");
+// Update the competition data (announcing the winner)
+$stmt = $conn->prepare("
+    UPDATE competitions 
+    SET winner_id = ?, winner_token = ?, winning_recipe_id = ?, announced_at = NOW() 
+    WHERE competition_id = ?
+");
+$token = bin2hex(random_bytes(32));  // Generate a unique token
+$stmt->bind_param("isis", $winner_id, $token, $recipe_id, $competition_id);
+
+if ($stmt->execute()) {
+    echo "Winner announced successfully!";
+    header("Location: view_winner.php?id=$competition_id&token=$token");
+    exit;
+} else {
+    echo "Failed to announce winner.";
 }
 
-// Process announcement
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Generate unique token for winner link
-    $token = bin2hex(random_bytes(32));
-    $update_sql = "UPDATE competitions SET winner_token = '$token' WHERE competition_id = $competition_id";
-    $conn->query($update_sql);
-    
-    // Send email to winner
-    $to = $competition_data['winner_email'];
-    $subject = "🏆 You Won: " . $competition_data['title'];
-    
-    $message = '
-    <html>
-    <head>
-        <style>
-            .button {
-                background: #4CAF50;
-                color: white;
-                padding: 12px 24px;
-                text-decoration: none;
-                border-radius: 5px;
-                display: inline-block;
-                font-weight: bold;
-                margin: 20px 0;
-            }
-        </style>
-    </head>
-    <body>
-        <h2>Congratulations, ' . $competition_data['winner_name'] . '! 🎉</h2>
-        <p>You have been selected as the winner of our competition: <strong>' . $competition_data['title'] . '</strong></p>
-        <p>Your prize: <strong>' . $competition_data['prize'] . '</strong></p>
-        
-        <p>Click below to view your winner page:</p>
-        <a href="https://yourdomain.com/view_winner.php?token=' . $token . '" class="button">
-            View Your Winner Page
-        </a>
-        
-        <p>We will contact you shortly with prize redemption details.</p>
-        <p>Thank you for participating!</p>
-    </body>
-    </html>
-    ';
-    
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-    $headers .= "From: competitions@yourdomain.com\r\n";
-    
-    if (mail($to, $subject, $message, $headers)) {
-        $_SESSION['success'] = "Winner announced and email sent successfully!";
-        header("Location: view_winner.php?id=$competition_id");
-        exit;
-    } else {
-        $_SESSION['error'] = "Failed to send email";
-    }
-}
+$stmt->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -103,40 +52,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <?php include '../navbar.php'; ?>
-    
+
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Announce Competition Winner</h3>
-                    </div>
-                    <div class="card-body">
-                        <h4>Competition: <?= htmlspecialchars($competition_data['title']) ?></h4>
-                        <p>Winner: <?= htmlspecialchars($competition_data['winner_name']) ?></p>
-                        <p>Prize: <?= htmlspecialchars($competition_data['prize']) ?></p>
-                        <p>Email: <?= htmlspecialchars($competition_data['winner_email']) ?></p>
-                        
-                        <div class="alert alert-warning mt-4">
-                            <h5><i class="bi bi-exclamation-triangle-fill"></i> Important</h5>
-                            <p>This action will:</p>
-                            <ul>
-                                <li>Generate a unique link for the winner</li>
-                                <li>Send an email notification to the winner</li>
-                                <li>Make the winner page publicly accessible</li>
-                            </ul>
-                        </div>
-                        
-                        <form method="POST">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-megaphone-fill"></i> Announce Winner
-                            </button>
-                            <a href="dashboard.php" class="btn btn-secondary">
-                                Cancel
-                            </a>
-                        </form>
-                    </div>
-                </div>
+        <h2>Announce Winner</h2>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>Competition: <?= htmlspecialchars($competition_data['title']) ?></h3>
+            </div>
+            <div class="card-body">
+                <p>Prize: <?= htmlspecialchars($competition_data['prize']) ?></p>
+                
+                <?php if (!empty($competition_data['winner_name'])): ?>
+                    <p>Winner: <?= htmlspecialchars($competition_data['winner_name']) ?></p>
+                    <p>Email: <?= htmlspecialchars($competition_data['winner_email']) ?></p>
+                <?php else: ?>
+                    <form method="POST">
+                        <input type="hidden" name="id" value="<?= $competition_id ?>">
+                        <button type="submit" class="btn btn-success">
+                            Announce Winner
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
     </div>

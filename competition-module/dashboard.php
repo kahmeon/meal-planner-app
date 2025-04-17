@@ -877,7 +877,7 @@ try {
                     <div class="card stat-card shadow-sm">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="bi bi-trophy-fill"></i> Ongoing Competitions</h4>
-                            <a href="competitions.php" class="btn btn-sm btn-outline-primary">Manage Competitions</a>
+                            <a href="competition.php" class="btn btn-sm btn-outline-primary">Manage Competitions</a>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($competitionsData)): ?>
@@ -894,67 +894,60 @@ try {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($competitionsData as $comp): ?>
-                                                <tr>
-                                                    <td><strong><?= htmlspecialchars($comp['title']) ?></strong></td>
-                                                    <td><?= htmlspecialchars($comp['participants']) ?></td>
-                                                    <td>
-                                                        <?php if (!empty($comp['leading_user_name'])): ?>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="user-avatar me-2">
-                                                                    <?= strtoupper(substr($comp['leading_user_name'], 0, 1)) ?>
-                                                                </div>
-                                                                <?= htmlspecialchars($comp['leading_user_name']) ?>
-                                                                (<?= htmlspecialchars($comp['leading_recipe_title']) ?>)
-                                                            </div>
-                                                        <?php else: ?>
-                                                            <span class="text-muted">No leader yet</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex flex-column">
-                                                            <span class="text-success">↑ <?= htmlspecialchars($comp['upvotes'] ?? 0) ?></span>
-                                                            <span class="text-danger">↓ <?= htmlspecialchars($comp['downvotes'] ?? 0) ?></span>
-                                                            <small class="text-muted">Net: <?= ($comp['upvotes'] ?? 0) - ($comp['downvotes'] ?? 0) ?></small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <?php if (!empty($comp['winner_id'])): ?>
-                                                            <span class="badge bg-success">
-                                                                <i class="bi bi-check-circle-fill"></i> Announced
-                                                            </span>
-                                                        <?php else: ?>
-                                                            <span class="badge bg-warning">
-                                                                <i class="bi bi-hourglass-split"></i> Ongoing
-                                                            </span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php if (!empty($comp['winner_id'])): ?>
-                                                            <a href="view_winner.php?id=<?= $comp['competition_id'] ?>" 
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                <i class="bi bi-eye"></i> View
-                                                            </a>
-                                                            <!-- Add this new button for emailing winner -->
-        <a href="admin_email_winner.php?id=<?= $comp['competition_id'] ?>" 
-           class="btn btn-sm btn-outline-success ms-1">
-           <i class="bi bi-envelope"></i> Email
-        </a>
-                                                        <?php elseif (!empty($comp['leading_recipe_id'])): ?>
-                                                            <form action="announce_winner.php" method="POST" class="d-inline">
-                                                                <input type="hidden" name="competition_id" value="<?= $comp['competition_id'] ?>">
-                                                                <input type="hidden" name="winner_id" value="<?= $comp['leading_user_id'] ?>">
-                                                                <input type="hidden" name="recipe_id" value="<?= $comp['leading_recipe_id'] ?>">
-                                                                <button type="submit" class="btn btn-success btn-sm">
-                                                                    <i class="bi bi-megaphone"></i> Announce
-                                                                </button>
-                                                            </form>
-                                                        <?php else: ?>
-                                                            <span class="text-muted">No winner yet</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                                            <!-- Updated dashboard.php code -->
+<?php
+// Assuming this is part of your loop to display competitions
+foreach ($competitionsData as $comp): ?>
+    <tr>
+        <td><strong><?= htmlspecialchars($comp['title']) ?></strong></td>
+        <td><?= htmlspecialchars($comp['participants']) ?></td>
+        <td>
+            <?php if (!empty($comp['leading_user_name'])): ?>
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-2">
+                        <?= strtoupper(substr($comp['leading_user_name'], 0, 1)) ?>
+                    </div>
+                    <?= htmlspecialchars($comp['leading_user_name']) ?>
+                    (<?= htmlspecialchars($comp['leading_recipe_title']) ?>)
+                </div>
+            <?php else: ?>
+                <span class="text-muted">No leader yet</span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <div class="d-flex flex-column">
+                <span class="text-success">↑ <?= htmlspecialchars($comp['upvotes'] ?? 0) ?></span>
+                <span class="text-danger">↓ <?= htmlspecialchars($comp['downvotes'] ?? 0) ?></span>
+                <small class="text-muted">Net: <?= ($comp['upvotes'] ?? 0) - ($comp['downvotes'] ?? 0) ?></small>
+            </div>
+        </td>
+        <td>
+            <?php if (!empty($comp['winner_id'])): ?>
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle-fill"></i> Announced
+                </span>
+            <?php else: ?>
+                <span class="badge bg-warning">
+                    <i class="bi bi-hourglass-split"></i> Ongoing
+                </span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <?php if (!empty($comp['winner_id'])): ?>
+                <a href="view_winner.php?id=<?= $comp['competition_id'] ?>" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> View
+                </a>
+            <?php else: ?>
+                <!-- Ensure competition_id is passed in URL for announce_winner.php -->
+                <a href="announce_winner.php?id=<?= $comp['competition_id'] ?>" class="btn btn-success btn-sm">
+                    <i class="bi bi-megaphone"></i> Announce Winner
+                </a>
+            <?php endif; ?>
+        </td>
+    </tr>
+<?php endforeach; ?>
+
+                                                  
                                         </tbody>
                                     </table>
                                 </div>
