@@ -418,7 +418,7 @@ require_once 'includes/db.php';
     <div class="slide-content">
       <h1 class="display-3 fw-bold mb-4">Connect & Share</h1>
       <p class="lead fs-3 mb-4">Join our vibrant cooking community.</p>
-      <a href="community.php" class="btn btn-red btn-lg">Join Community</a>
+      <a href="community-module/community-mainpage.php" class="btn btn-red btn-lg">Join Community</a>
     </div>
   </div>
   

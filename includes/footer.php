@@ -12,8 +12,8 @@
       <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
         <h5 class="footer-title mb-4 font-weight-bold" style="color: #e00000;">Navigation</h5>
         <p><a href="home.php" class="text-white text-decoration-none">Home</a></p>
-        <p><a href="#" class="text-white text-decoration-none">About Us</a></p>
-        <p><a href="#" class="text-white text-decoration-none">Contact</a></p>
+        <p><a href="aboutus.php" class="text-white text-decoration-none">About Us</a></p>
+        <p><a href="contactus.php" class="text-white text-decoration-none">Contact</a></p>
       </div>
 
       <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
